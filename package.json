@@ -1,0 +1,21 @@
+{
+  "name": "diploma",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^8.16.5"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.1",
+    "node": "^20.19.4",
+    "nodemon": "^3.1.10"
+  }
+}
