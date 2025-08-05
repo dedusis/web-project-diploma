@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info:
+title: Diploma API
+version: 1.0.0
+description: API docs for your diploma system
+
+paths:
+/:
+get:
+summary: Test route
+responses:
+'200':
+description: OK

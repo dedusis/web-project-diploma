@@ -11,7 +11,12 @@
   },
   "dependencies": {
     "express": "^5.1.0",
-    "mongoose": "^8.16.5"
+    "mongoose": "^8.16.5",
+    "swagger": "^0.7.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.8.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "dotenv": "^17.2.1",
