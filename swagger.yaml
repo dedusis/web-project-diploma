@@ -1,13 +1,220 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-title: Diploma API
-version: 1.0.0
-description: API docs for your diploma system
-
+  title: Professor API
+  version: 1.0.0
+  description: API για δημιουργία, ανάκτηση, ενημέρωση και διαγραφή καθηγητών με όλα τα πεδία.
+servers:
+  - url: http://localhost:3000
 paths:
-/:
-get:
-summary: Test route
-responses:
-'200':
-description: OK
+  /Professor:
+    post:
+      summary: Δημιουργία νέου καθηγητή
+      description: Προσθέτει νέο καθηγητή στο σύστημα.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfessorRequest'
+      responses:
+        "201":
+          description: Καθηγητής δημιουργήθηκε επιτυχώς
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Professor'
+        "400":
+          description: Λάθος αίτημα ή ο καθηγητής υπάρχει ήδη
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /Professor/{username}:
+    get:
+      summary: Ανάκτηση καθηγητή με βάση το username
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          example: jdoe
+      responses:
+        "200":
+          description: Καθηγητής ανακτήθηκε επιτυχώς
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Professor'
+        "404":
+          description: Ο καθηγητής δεν βρέθηκε
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Ενημέρωση καθηγητή με βάση το username
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          example: jdoe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfessorRequest'
+      responses:
+        "200":
+          description: Καθηγητής ενημερώθηκε επιτυχώς
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Professor'
+        "404":
+          description: Ο καθηγητής δεν βρέθηκε
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Διαγραφή καθηγητή με βάση το username
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          example: jdoe
+      responses:
+        "200":
+          description: Καθηγητής διαγράφηκε επιτυχώς
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Professor deleted successfully
+        "404":
+          description: Ο καθηγητής δεν βρέθηκε
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Professor:
+      type: object
+      properties:
+        name:
+          type: string
+          example: John
+        surname:
+          type: string
+          example: Doe
+        topic:
+          type: string
+          example: Computer Science
+        landline:
+          type: string
+          example: "2101234567"
+        mobile:
+          type: string
+          example: "6912345678"
+        email:
+          type: string
+          format: email
+          example: jdoe@example.com
+        department:
+          type: string
+          example: Computer Science
+        username:
+          type: string
+          example: jdoe
+
+    CreateProfessorRequest:
+      type: object
+      required:
+        - name
+        - surname
+        - topic
+        - landline
+        - mobile
+        - email
+        - department
+        - username
+        - password
+      properties:
+        name:
+          type: string
+          example: John
+        surname:
+          type: string
+          example: Doe
+        topic:
+          type: string
+          example: Computer Science
+        landline:
+          type: string
+          example: "2101234567"
+        mobile:
+          type: string
+          example: "6912345678"
+        email:
+          type: string
+          format: email
+          example: jdoe@example.com
+        department:
+          type: string
+          example: Computer Science
+        username:
+          type: string
+          example: jdoe
+        password:
+          type: string
+          example: mySecurePass123
+
+    UpdateProfessorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: John Updated
+        surname:
+          type: string
+          example: Doe Updated
+        topic:
+          type: string
+          example: Mathematics
+        landline:
+          type: string
+          example: "2107654321"
+        mobile:
+          type: string
+          example: "6998765432"
+        email:
+          type: string
+          format: email
+          example: jdoe_updated@example.com
+        department:
+          type: string
+          example: Mathematics
+        password:
+          type: string
+          example: newSecurePass456
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Ο καθηγητής δε βρέθηκε!
