@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import Secretary from './model.js';
-import { error } from 'console';
 
 const createSecretary = async (data) => {
     const existing = await Secretary.findOne({ username: data.username });

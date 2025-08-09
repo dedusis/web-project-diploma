@@ -128,6 +128,173 @@ paths:
         '404':
           description: Secretary not found
 
+  /student:
+    post:
+      summary: Create a new student
+      tags:
+        - Student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - name
+                - surname
+                - student_number
+                - email
+              properties:
+                username:
+                  type: string
+                  example: stud1
+                password:
+                  type: string
+                  example: pass1234
+                name:
+                  type: string
+                  example: Γιάννης
+                surname:
+                  type: string
+                  example: Παπαδόπουλος
+                student_number:
+                  type: string
+                  example: 123456
+                street:
+                  type: string
+                  example: Πατησίων
+                number:
+                  type: string
+                  example: "12"
+                city:
+                  type: string
+                  example: Αθήνα
+                postcode:
+                  type: string
+                  example: "10434"
+                father_name:
+                  type: string
+                  example: Νικόλαος
+                landline_telephone:
+                  type: string
+                  example: "2101234567"
+                mobile_telephone:
+                  type: string
+                  example: "6912345678"
+                email:
+                  type: string
+                  example: giannis@example.com
+      responses:
+        '201':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          description: Bad request (e.g. username exists)
+
+  /student/{username}:
+    get:
+      summary: Get a student by username
+      tags:
+        - Student
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          example: stud1
+      responses:
+        '200':
+          description: Student found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '404':
+          description: Student not found
+
+    put:
+      summary: Update a student by username
+      tags:
+        - Student
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          example: stud1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Νέο Όνομα
+                surname:
+                  type: string
+                  example: Νέο Επίθετο
+                password:
+                  type: string
+                  example: newpass
+                student_number:
+                  type: string
+                  example: 654321
+                street:
+                  type: string
+                  example: Ακαδημίας
+                number:
+                  type: string
+                  example: "45"
+                city:
+                  type: string
+                  example: Πάτρα
+                postcode:
+                  type: string
+                  example: "26221"
+                father_name:
+                  type: string
+                  example: Δημήτρης
+                landline_telephone:
+                  type: string
+                  example: "2610123456"
+                mobile_telephone:
+                  type: string
+                  example: "6998765432"
+                email:
+                  type: string
+                  example: newmail@example.com
+      responses:
+        '200':
+          description: Student updated successfully
+        '404':
+          description: Student not found
+
+    delete:
+      summary: Delete a student by username
+      tags:
+        - Student
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          example: stud1
+      responses:
+        '200':
+          description: Student deleted successfully
+        '404':
+          description: Student not found
+
 components:
   schemas:
     Secretary:
@@ -142,6 +309,41 @@ components:
         email:
           type: string
         department:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Student:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        student_number:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        father_name:
+          type: string
+        landline_telephone:
+          type: string
+        mobile_telephone:
+          type: string
+        email:
           type: string
         createdAt:
           type: string
