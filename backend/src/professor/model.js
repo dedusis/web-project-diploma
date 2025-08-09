@@ -1,24 +1,52 @@
 import mongoose, { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-const ProfessorSchema=new Schema({
-name:{type:String,required:true},
-surname:{type:String,required:true},
-topic:{type:String,required:true},
-landline:{type:String,required:true},
-mobile:{type:String,required:true},
-email:{type:String,required:true,unique:true},
-department:{type:String,required:true},
-username:{
-    type:String,
-    unique:true,
-    required:true
-},
-
-password:{
-    type:String,
-    required:true
-}
+const ProfessorSchema=new Schema(
+    {
+    name: {
+        type: String,
+        required:true
+    },
+    surname: {
+        type: String,
+        required: true
+    },
+    topic: {
+        type: String,
+        required: true
+    },
+    landline: {
+        type: String,
+        required: true
+    },
+    mobile: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    department: {
+        type: String,
+        required: true
+    },
+    university: {
+        type: String,
+        required: true
+    },
+    username:{
+        type:String,
+        unique:true,
+        required:true,
+        lowercase: true,
+        trim: true
+    },
+    password:{
+        type:String,
+        required:true
+    }
 });
 
 ProfessorSchema.pre('save',async function(next){

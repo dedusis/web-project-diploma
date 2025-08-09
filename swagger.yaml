@@ -1,9 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Diploma Management API / Professor API
+  title: Diploma Management API 
   version: 1.0.0
-  description: >
-    API για δημιουργία, ανάκτηση, ενημέρωση και διαγραφή καθηγητών με όλα τα πεδία.
+  description: >    
     API for managing diploma assignments, users (students, professors, secretaries) and data imports.
 servers:
   - url: http://localhost:3000
@@ -12,8 +11,8 @@ servers:
 paths:
   /Professor:
     post:
-      summary: Δημιουργία νέου καθηγητή
-      description: Προσθέτει νέο καθηγητή στο σύστημα.
+      summary: Create a new Professor user
+      description: add new Professor.
       requestBody:
         required: true
         content:
@@ -22,13 +21,13 @@ paths:
               $ref: '#/components/schemas/CreateProfessorRequest'
       responses:
         "201":
-          description: Καθηγητής δημιουργήθηκε επιτυχώς
+          description: professor created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Professor'
         "400":
-          description: Λάθος αίτημα ή ο καθηγητής υπάρχει ήδη
+          description: Bad request (e.g. username exists)
           content:
             application/json:
               schema:
@@ -36,7 +35,7 @@ paths:
 
   /Professor/{username}:
     get:
-      summary: Ανάκτηση καθηγητή με βάση το username
+      summary: Get professor by username
       parameters:
         - in: path
           name: username
@@ -46,20 +45,20 @@ paths:
           example: jdoe
       responses:
         "200":
-          description: Καθηγητής ανακτήθηκε επιτυχώς
+          description: professor found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Professor'
         "404":
-          description: Ο καθηγητής δεν βρέθηκε
+          description: professor not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
     put:
-      summary: Ενημέρωση καθηγητή με βάση το username
+      summary: Update professor by username
       parameters:
         - in: path
           name: username
@@ -75,20 +74,20 @@ paths:
               $ref: '#/components/schemas/UpdateProfessorRequest'
       responses:
         "200":
-          description: Καθηγητής ενημερώθηκε επιτυχώς
+          description: professor updated successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Professor'
         "404":
-          description: Ο καθηγητής δεν βρέθηκε
+          description: professor not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
     delete:
-      summary: Διαγραφή καθηγητή με βάση το username
+      summary: delete professor by username
       parameters:
         - in: path
           name: username
@@ -98,7 +97,7 @@ paths:
           example: jdoe
       responses:
         "200":
-          description: Καθηγητής διαγράφηκε επιτυχώς
+          description: professor deleted successfully
           content:
             application/json:
               schema:
@@ -108,7 +107,7 @@ paths:
                     type: string
                     example: Professor deleted successfully
         "404":
-          description: Ο καθηγητής δεν βρέθηκε
+          description: professor not found
           content:
             application/json:
               schema:
@@ -426,6 +425,9 @@ components:
         department:
           type: string
           example: Computer Science
+        university:
+          type: string
+          ecample: University of Patras
         username:
           type: string
           example: jdoe
@@ -440,6 +442,7 @@ components:
         - mobile
         - email
         - department
+        - university
         - username
         - password
       properties:
@@ -465,6 +468,9 @@ components:
         department:
           type: string
           example: Computer Science
+        university:
+          type: string
+          ecample: University of Patras
         username:
           type: string
           example: jdoe
@@ -497,6 +503,9 @@ components:
         department:
           type: string
           example: Mathematics
+        university:
+          type: string
+          ecample: University of Patras
         password:
           type: string
           example: newSecurePass456
@@ -506,7 +515,7 @@ components:
       properties:
         error:
           type: string
-          example: Ο καθηγητής δε βρέθηκε!
+          example: professor not found
 
     Secretary:
       type: object
