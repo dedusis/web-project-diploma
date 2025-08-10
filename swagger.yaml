@@ -9,95 +9,31 @@ servers:
     description: Local server
 
 paths:
-  /Professor:
+  /auth/login:
     post:
-      summary: Create a new Professor user
-      description: add new Professor.
+      summary: User login
+      description: Login for students, professors, and secretaries. Returns JWT token and user info.
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProfessorRequest'
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: stud1
+                password:
+                  type: string
+                  example: pass1234
       responses:
-        "201":
-          description: professor created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Professor'
-        "400":
-          description: Bad request (e.g. username exists)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /Professor/{username}:
-    get:
-      summary: Get professor by username
-      parameters:
-        - in: path
-          name: username
-          schema:
-            type: string
-          required: true
-          example: jdoe
-      responses:
-        "200":
-          description: professor found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Professor'
-        "404":
-          description: professor not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-    put:
-      summary: Update professor by username
-      parameters:
-        - in: path
-          name: username
-          schema:
-            type: string
-          required: true
-          example: jdoe
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateProfessorRequest'
-      responses:
-        "200":
-          description: professor updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Professor'
-        "404":
-          description: professor not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-    delete:
-      summary: delete professor by username
-      parameters:
-        - in: path
-          name: username
-          schema:
-            type: string
-          required: true
-          example: jdoe
-      responses:
-        "200":
-          description: professor deleted successfully
+        '200':
+          description: Login successful
           content:
             application/json:
               schema:
@@ -105,13 +41,185 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Professor deleted successfully
-        "404":
-          description: professor not found
+                    example: Login successful
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  role:
+                    type: string
+                    example: student
+                  username:
+                    type: string
+                    example: stud1
+                  name:
+                    type: string
+                    example: Γιάννης
+        '400':
+          description: Missing username or password
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /Professor:
+    post:
+      summary: Create a new Professor
+      tags:
+        - Professor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - name
+                - surname
+                - topic
+                - landline
+                - mobile
+                - email
+                - department
+                - university
+              properties:
+                username:
+                  type: string
+                  example: prof1
+                password:
+                  type: string
+                  example: pass1234
+                name:
+                  type: string
+                  example: Γιάννης
+                surname:
+                  type: string
+                  example: Παπαδόπουλος
+                topic:
+                  type: string
+                  example: Τεχνητή Νοημοσύνη
+                landline:
+                  type: string
+                  example: "2101234567"
+                mobile:
+                  type: string
+                  example: "6912345678"
+                email:
+                  type: string
+                  format: email
+                  example: giannis@example.com
+                department:
+                  type: string
+                  example: Πληροφορικής
+                university:
+                  type: string
+                  example: Πανεπιστήμιο Πατρών
+      responses:
+        '201':
+          description: Professor created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Professor'
+        '400':
+          description: Bad request (e.g. username exists)
+
+  /Professor/{username}:
+    get:
+      summary: Get a Professor by username
+      tags:
+        - Professor
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          example: prof1
+      responses:
+        '200':
+          description: Professor found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Professor'
+        '404':
+          description: Professor not found
+
+    put:
+      summary: Update a Professor by username
+      tags:
+        - Professor
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          example: prof1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Νέο Όνομα
+                surname:
+                  type: string
+                  example: Νέο Επίθετο
+                topic:
+                  type: string
+                  example: Νέο Θέμα
+                landline:
+                  type: string
+                  example: "2107654321"
+                mobile:
+                  type: string
+                  example: "6998765432"
+                email:
+                  type: string
+                  example: newmail@example.com
+                department:
+                  type: string
+                  example: Νέο Τμήμα
+                university:
+                  type: string
+                  example: Νέο Πανεπιστήμιο
+                password:
+                  type: string
+                  example: newpass123
+      responses:
+        '200':
+          description: Professor updated successfully
+        '404':
+          description: Professor not found
+
+    delete:
+      summary: Delete a Professor by username
+      tags:
+        - Professor
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          example: prof1
+      responses:
+        '200':
+          description: Professor deleted successfully
+        '404':
+          description: Professor not found
 
   /secretary:
     post:
@@ -427,88 +535,10 @@ components:
           example: Computer Science
         university:
           type: string
-          ecample: University of Patras
+          example: University of Patras
         username:
           type: string
           example: jdoe
-
-    CreateProfessorRequest:
-      type: object
-      required:
-        - name
-        - surname
-        - topic
-        - landline
-        - mobile
-        - email
-        - department
-        - university
-        - username
-        - password
-      properties:
-        name:
-          type: string
-          example: John
-        surname:
-          type: string
-          example: Doe
-        topic:
-          type: string
-          example: Computer Science
-        landline:
-          type: string
-          example: "2101234567"
-        mobile:
-          type: string
-          example: "6912345678"
-        email:
-          type: string
-          format: email
-          example: jdoe@example.com
-        department:
-          type: string
-          example: Computer Science
-        university:
-          type: string
-          ecample: University of Patras
-        username:
-          type: string
-          example: jdoe
-        password:
-          type: string
-          example: mySecurePass123
-
-    UpdateProfessorRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          example: John Updated
-        surname:
-          type: string
-          example: Doe Updated
-        topic:
-          type: string
-          example: Mathematics
-        landline:
-          type: string
-          example: "2107654321"
-        mobile:
-          type: string
-          example: "6998765432"
-        email:
-          type: string
-          format: email
-          example: jdoe_updated@example.com
-        department:
-          type: string
-          example: Mathematics
-        university:
-          type: string
-          ecample: University of Patras
-        password:
-          type: string
-          example: newSecurePass456
 
     ErrorResponse:
       type: object
@@ -536,6 +566,7 @@ components:
         updatedAt:
           type: string
           format: date-time
+
     Student:
       type: object
       properties:

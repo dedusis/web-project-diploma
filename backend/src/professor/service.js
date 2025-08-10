@@ -5,21 +5,21 @@ import {error} from 'console';
 const createProfessor = async(data) => {
     const existing=await Professor.findOne({username:data.username});
     if(existing){
-        throw new Error('O καθηγητής είναι ήδη εγγεγραμένος στο σύστημα!');
+        throw new Error('Professor already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password,10);
 
     const newProfessor = new Professor({
         username: data.username,
-        password: hashedPassword, // Use hashed password
+        password: data.password, 
         name: data.name,
-        surname: data.surname, // Add missing fields
-        topic: data.topic,     // Add missing fields
-        landline: data.landline, // Add missing fields
-        mobile: data.mobile,   // Add missing fields
+        surname: data.surname, 
+        topic: data.topic,     
+        landline: data.landline, 
+        mobile: data.mobile,   
         email: data.email,
         department: data.department,
+        university: data.university,
     });
 
     return await newProfessor.save();

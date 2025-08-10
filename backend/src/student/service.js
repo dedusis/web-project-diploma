@@ -7,11 +7,10 @@ const createStudent = async (data) => {
     throw new Error('Username already exists');
   }
 
-  const hashedPassword = await bcrypt.hash(data.password, 10);
 
   const newStudent = new Student({
     username: data.username,
-    password: hashedPassword,
+    password: data.password,
     name: data.name,
     surname: data.surname,
     student_number: data.student_number,

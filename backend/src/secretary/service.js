@@ -7,11 +7,10 @@ const createSecretary = async (data) => {
         throw new Error('User name already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const newSecretary = new Secretary({
         username: data.username,
-        password: hashedPassword,
+        password: data.password,
         name: data.name,
         email: data.email,
         department: data.department

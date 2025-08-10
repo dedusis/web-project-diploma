@@ -40,4 +40,15 @@ const secretarySchema = new mongoose.Schema(
   }
 );
 
+secretarySchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default mongoose.model('Secretary', secretarySchema);
