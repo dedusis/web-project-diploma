@@ -8,6 +8,13 @@ servers:
   - url: http://localhost:3000
     description: Local server
 
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
 paths:
   /auth/login:
     post:
@@ -72,6 +79,8 @@ paths:
       summary: Create a new Professor
       tags:
         - Professor
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -136,6 +145,8 @@ paths:
       summary: Get a Professor by username
       tags:
         - Professor
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -157,6 +168,8 @@ paths:
       summary: Update a Professor by username
       tags:
         - Professor
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -208,6 +221,8 @@ paths:
       summary: Delete a Professor by username
       tags:
         - Professor
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -226,6 +241,8 @@ paths:
       summary: Create a new secretary user
       tags:
         - Secretary
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -269,6 +286,8 @@ paths:
       summary: Get a secretary by username
       tags:
         - Secretary
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -290,6 +309,8 @@ paths:
       summary: Update a secretary by username
       tags:
         - Secretary
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -326,6 +347,8 @@ paths:
       summary: Delete a secretary by username
       tags:
         - Secretary
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -344,6 +367,8 @@ paths:
       summary: Create a new student
       tags:
         - Student
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -412,6 +437,8 @@ paths:
       summary: Get a student by username
       tags:
         - Student
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -433,6 +460,8 @@ paths:
       summary: Update a student by username
       tags:
         - Student
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
@@ -493,6 +522,8 @@ paths:
       summary: Delete a student by username
       tags:
         - Student
+      security:
+        - bearerAuth: []
       parameters:
         - name: username
           in: path
