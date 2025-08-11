@@ -1,23 +1,39 @@
-import mongoose, { Schema, model } from 'mongoose';
+import mongoose from "mongoose";
 
-
-const thesesSchema = new Schema({
-    title: {type:String,
-            required:true,
-            unique:true},
-
-    supervisor:{type:String,required:true},
-
-    student:{type:String},
-
-    description: {type:String,
-        required:true},
-        
-    pdf:    { 
-        data:Buffer,
-        contentType:String,
-        filename:String
+const thesesSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "completed"],
+      default: "pending"
+    },
+    assignedDate: {
+      type: Date,
+      default: Date.now
+    },
+    professor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Professor",
+      required: true
+    },
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+      required: true
     }
-})
+  },
+  {
+    timestamps: true
+  }
+);
 
-export default model('Theses',thesesSchema);
+export default mongoose.model("Theses", thesesSchema);
