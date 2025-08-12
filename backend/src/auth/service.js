@@ -13,7 +13,7 @@ const login = async (username, password) => {
     } else {
         user = await Professor.findOne({ username });
         if (user) {
-            role = 'professpr';
+            role = 'professor';
         } else {
             user = await Secretary.findOne({ username });
             if (user) {
@@ -44,4 +44,18 @@ const login = async (username, password) => {
     return { role, user, token };
 }
 
-export default { login };
+const getProfile = async (role, username) => {
+    let user;
+
+    if (role === 'student') {
+        user = await Student.findOne({ username }).select('-password');
+    } else if (role === 'professor') {
+        user = await Professor.findOne({ username }).select('-password');
+    } else if (role === 'secretary') {
+        user = await Secretary.findOne({ username }).select('-password');
+    }
+
+    return user;
+}
+
+export default { login, getProfile };

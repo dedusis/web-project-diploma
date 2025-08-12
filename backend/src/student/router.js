@@ -1,11 +1,19 @@
 import express from 'express';
 import studentController from './controller.js';
+import { authenticateToken, authorizeRoles } from '../auth/middleware.js';
 
 const router = express.Router();
 
-router.post('/', studentController.createStudentController);
-router.get('/:username', studentController.getStudentController);
-router.put('/:username', studentController.updateStudentController);
-router.delete('/:username', studentController.deleteStudentController);
+//Create user (secretary)
+router.post('/', authenticateToken, authorizeRoles('secretary'), studentController.createStudentController);
+
+//Get user (secretary)
+router.get('/:username', authenticateToken, authorizeRoles('secretary'), studentController.getStudentController);
+
+//Update user (secretary)
+router.put('/:username', authenticateToken, authorizeRoles('secretary'), studentController.updateStudentController);
+
+//Delete user (secretary)
+router.delete('/:username', authenticateToken, authorizeRoles('secretary'), studentController.deleteStudentController);
 
 export default router;

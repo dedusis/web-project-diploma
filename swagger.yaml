@@ -8,13 +8,6 @@ servers:
   - url: http://localhost:3000
     description: Local server
 
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
 paths:
   /auth/login:
     post:
@@ -74,6 +67,53 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /auth/me:
+    get:
+      summary: Get logged-in user profile
+      description: Returns the profile information of the currently authenticated user (student, professor, or secretary).
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: 64f1c2c5a7e8a21b9c123456
+                  username:
+                    type: string
+                    example: stud1
+                  name:
+                    type: string
+                    example: Γιάννης
+                  surname:
+                    type: string
+                    example: Παπαδόπουλος
+                  role:
+                    type: string
+                    example: student
+                  email:
+                    type: string
+                    example: giannis@example.com
+        '401':
+          description: Unauthorized - No token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /Professor:
     post:
       summary: Create a new Professor
@@ -86,50 +126,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - username
-                - password
-                - name
-                - surname
-                - topic
-                - landline
-                - mobile
-                - email
-                - department
-                - university
-              properties:
-                username:
-                  type: string
-                  example: prof1
-                password:
-                  type: string
-                  example: pass1234
-                name:
-                  type: string
-                  example: Γιάννης
-                surname:
-                  type: string
-                  example: Παπαδόπουλος
-                topic:
-                  type: string
-                  example: Τεχνητή Νοημοσύνη
-                landline:
-                  type: string
-                  example: "2101234567"
-                mobile:
-                  type: string
-                  example: "6912345678"
-                email:
-                  type: string
-                  format: email
-                  example: giannis@example.com
-                department:
-                  type: string
-                  example: Πληροφορικής
-                university:
-                  type: string
-                  example: Πανεπιστήμιο Πατρών
+              $ref: '#/components/schemas/CreateProfessorRequest'
       responses:
         '201':
           description: Professor created successfully
@@ -182,35 +179,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: Νέο Όνομα
-                surname:
-                  type: string
-                  example: Νέο Επίθετο
-                topic:
-                  type: string
-                  example: Νέο Θέμα
-                landline:
-                  type: string
-                  example: "2107654321"
-                mobile:
-                  type: string
-                  example: "6998765432"
-                email:
-                  type: string
-                  example: newmail@example.com
-                department:
-                  type: string
-                  example: Νέο Τμήμα
-                university:
-                  type: string
-                  example: Νέο Πανεπιστήμιο
-                password:
-                  type: string
-                  example: newpass123
+              $ref: '#/components/schemas/UpdateProfessorRequest'
       responses:
         '200':
           description: Professor updated successfully
@@ -374,54 +343,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - username
-                - password
-                - name
-                - surname
-                - student_number
-                - email
-              properties:
-                username:
-                  type: string
-                  example: stud1
-                password:
-                  type: string
-                  example: pass1234
-                name:
-                  type: string
-                  example: Γιάννης
-                surname:
-                  type: string
-                  example: Παπαδόπουλος
-                student_number:
-                  type: string
-                  example: 123456
-                street:
-                  type: string
-                  example: Πατησίων
-                number:
-                  type: string
-                  example: "12"
-                city:
-                  type: string
-                  example: Αθήνα
-                postcode:
-                  type: string
-                  example: "10434"
-                father_name:
-                  type: string
-                  example: Νικόλαος
-                landline_telephone:
-                  type: string
-                  example: "2101234567"
-                mobile_telephone:
-                  type: string
-                  example: "6912345678"
-                email:
-                  type: string
-                  example: giannis@example.com
+              $ref: '#/components/schemas/CreateStudentRequest'
       responses:
         '201':
           description: Student created successfully
@@ -474,44 +396,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: Νέο Όνομα
-                surname:
-                  type: string
-                  example: Νέο Επίθετο
-                password:
-                  type: string
-                  example: newpass
-                student_number:
-                  type: string
-                  example: 654321
-                street:
-                  type: string
-                  example: Ακαδημίας
-                number:
-                  type: string
-                  example: "45"
-                city:
-                  type: string
-                  example: Πάτρα
-                postcode:
-                  type: string
-                  example: "26221"
-                father_name:
-                  type: string
-                  example: Δημήτρης
-                landline_telephone:
-                  type: string
-                  example: "2610123456"
-                mobile_telephone:
-                  type: string
-                  example: "6998765432"
-                email:
-                  type: string
-                  example: newmail@example.com
+              $ref: '#/components/schemas/UpdateStudentRequest'
       responses:
         '200':
           description: Student updated successfully
@@ -539,7 +424,7 @@ paths:
 
   /theses:
     post:
-      summary: Create a new thesis
+      summary: Create a new theses
       tags:
         - Theses
       security:
@@ -549,31 +434,10 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - title
-                - professor
-                - student
-              properties:
-                title:
-                  type: string
-                  example: Ανάπτυξη Συστήματος Τεχνητής Νοημοσύνης
-                description:
-                  type: string
-                  example: Περιγραφή διπλωματικής εργασίας
-                status:
-                  type: string
-                  enum: [pending, approved, completed]
-                  example: pending
-                professor:
-                  type: string
-                  example: 64f1c2c5a7e8a21b9c123456
-                student:
-                  type: string
-                  example: 64f1c2c5a7e8a21b9c654321
+              $ref: '#/components/schemas/CreateThesesRequest'
       responses:
         '201':
-          description: Thesis created successfully
+          description: Theses created successfully
         '400':
           description: Bad request
         '403':
@@ -593,13 +457,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Thesis'
+                  $ref: '#/components/schemas/Theses'
         '401':
           description: Unauthorized
 
   /theses/{id}:
     get:
-      summary: Get thesis by ID
+      summary: Get theses by ID
       tags:
         - Theses
       security:
@@ -613,16 +477,16 @@ paths:
           example: 64f1c2c5a7e8a21b9c123456
       responses:
         '200':
-          description: Thesis found
+          description: Theses found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Thesis'
+                $ref: '#/components/schemas/Theses'
         '404':
-          description: Thesis not found
+          description: Theses not found
 
     put:
-      summary: Update thesis by ID
+      summary: Update theses by ID
       tags:
         - Theses
       security:
@@ -638,28 +502,17 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                  example: Ενημερωμένος Τίτλος
-                description:
-                  type: string
-                  example: Ενημερωμένη περιγραφή
-                status:
-                  type: string
-                  enum: [pending, approved, completed]
-                  example: approved
+              $ref: '#/components/schemas/UpdateThesesRequest'
       responses:
         '200':
-          description: Thesis updated successfully
+          description: Theses updated successfully
         '404':
-          description: Thesis not found
+          description: Theses not found
         '403':
           description: Not authorized
 
     delete:
-      summary: Delete thesis by ID
+      summary: Delete theses by ID
       tags:
         - Theses
       security:
@@ -672,52 +525,103 @@ paths:
             type: string
       responses:
         '200':
-          description: Thesis deleted successfully
+          description: Theses deleted successfully
         '404':
-          description: Thesis not found
+          description: Theses not found
         '403':
           description: Not authorized
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Professor:
       type: object
       properties:
         name:
           type: string
-          example: John
         surname:
           type: string
-          example: Doe
         topic:
           type: string
-          example: Computer Science
         landline:
           type: string
-          example: "2101234567"
         mobile:
           type: string
-          example: "6912345678"
         email:
           type: string
-          format: email
-          example: jdoe@example.com
         department:
           type: string
-          example: Computer Science
         university:
           type: string
-          example: University of Patras
         username:
           type: string
-          example: jdoe
+
+    CreateProfessorRequest:
+      type: object
+      required:
+        - username
+        - password
+        - name
+        - surname
+        - topic
+        - landline
+        - mobile
+        - email
+        - department
+        - university
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        topic:
+          type: string
+        landline:
+          type: string
+        mobile:
+          type: string
+        email:
+          type: string
+        department:
+          type: string
+        university:
+          type: string
+
+    UpdateProfessorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        topic:
+          type: string
+        landline:
+          type: string
+        mobile:
+          type: string
+        email:
+          type: string
+        department:
+          type: string
+        university:
+          type: string
+        password:
+          type: string
 
     ErrorResponse:
       type: object
       properties:
         error:
           type: string
-          example: professor not found
 
     Secretary:
       type: object
@@ -734,10 +638,8 @@ components:
           type: string
         createdAt:
           type: string
-          format: date-time
         updatedAt:
           type: string
-          format: date-time
 
     Student:
       type: object
@@ -770,12 +672,75 @@ components:
           type: string
         createdAt:
           type: string
-          format: date-time
         updatedAt:
           type: string
-          format: date-time
 
-    Thesis:
+    CreateStudentRequest:
+      type: object
+      required:
+        - username
+        - password
+        - name
+        - surname
+        - student_number
+        - email
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        student_number:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        father_name:
+          type: string
+        landline_telephone:
+          type: string
+        mobile_telephone:
+          type: string
+        email:
+          type: string
+
+    UpdateStudentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        password:
+          type: string
+        student_number:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        father_name:
+          type: string
+        landline_telephone:
+          type: string
+        mobile_telephone:
+          type: string
+        email:
+          type: string
+
+    Theses:
       type: object
       properties:
         _id:
@@ -786,17 +751,41 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, approved, completed]
         assignedDate:
           type: string
-          format: date-time
         professor:
           type: string
         student:
           type: string
         createdAt:
           type: string
-          format: date-time
         updatedAt:
           type: string
-          format: date-time
+
+    CreateThesesRequest:
+      type: object
+      required:
+        - title
+        - professor
+        - student
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        professor:
+          type: string
+        student:
+          type: string
+
+    UpdateThesesRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
