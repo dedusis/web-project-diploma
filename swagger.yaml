@@ -331,6 +331,54 @@ paths:
         '404':
           description: Secretary not found
 
+  /import:
+    post:
+      summary: Import students, professors, and theses from file
+      tags:
+        - Import
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JSON file containing data to import
+      responses:
+        '201':
+          description: Import successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportLog'
+        '400':
+          description: Invalid file or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Get all import logs
+      tags:
+        - Import
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of import logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImportLog'
+
   /student:
     post:
       summary: Create a new student
@@ -640,6 +688,44 @@ components:
           type: string
         updatedAt:
           type: string
+
+    ImportLog:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64f1c2c5a7e8a21b9c111111
+        filename:
+          type: string
+          example: students_batch_01.json
+        importDate:
+          type: string
+          format: date-time
+          example: 2025-08-13T10:00:00.000Z
+        importedBy:
+          type: string
+          description: ID of the secretary who performed the import
+          example: 64f1c2c5a7e8a21b9c222222
+        summary:
+          type: object
+          properties:
+            students:
+              type: integer
+              example: 10
+            professors:
+              type: integer
+              example: 5
+            theses:
+              type: integer
+              example: 3
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-08-13T10:00:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-08-13T10:05:00.000Z
 
     Student:
       type: object

@@ -4,6 +4,7 @@ import secretaryRouter from '../secretary/router.js';
 import studentRouter from '../student/router.js';
 import authRouter from '../auth/router.js';
 import thesesRouter from '../theses/router.js';
+import importRouter from '../import/router.js';
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.use('/secretary', secretaryRouter);
 router.use('/student', studentRouter);
 router.use('/auth', authRouter);
 router.use('/theses', thesesRouter);
+router.use('/import', importRouter);
 
 
 export default router;

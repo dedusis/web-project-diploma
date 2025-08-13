@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import './importLog.model.js';
+import '../import/model.js';
 
 
 const secretarySchema = new mongoose.Schema(
