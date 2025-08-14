@@ -7,6 +7,9 @@ const router = express.Router();
 //Create user (secretary)
 router.post('/', authenticateToken, authorizeRoles('secretary'), studentController.createStudentController);
 
+//Get all users (secretary)
+router.get('/', authenticateToken, authorizeRoles('secretary'), studentController.getAllStudentsController);
+
 //Get user (secretary)
 router.get('/:username', authenticateToken, authorizeRoles('secretary'), studentController.getStudentController);
 

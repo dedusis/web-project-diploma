@@ -19,6 +19,10 @@ const createSecretary = async (data) => {
     return await newSecretary.save();
 }
 
+const getAllSecretaries = async () => {
+    return await Secretary.find().select('-password');
+};
+
 const getSecretaryByUsername = async (username) => {
     return await Secretary.findOne({ username }).populate('createdImports');
 }
@@ -36,6 +40,7 @@ const deleteSecretaryByUsername = async (username) => {
 
 export default {
   createSecretary,
+  getAllSecretaries,
   getSecretaryByUsername,
   updateSecretaryByUsername,
   deleteSecretaryByUsername

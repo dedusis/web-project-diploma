@@ -6,6 +6,8 @@ const router = express.Router();
 
 //create secretary user
 router.post('/', authenticateToken, authorizeRoles('secretary'), secretaryController.createSecretaryController);
+//Get all users (secretary)
+router.get('/', authenticateToken, authorizeRoles('secretary'), secretaryController.getAllSecretariesController);
 //get by username
 router.get('/:username', authenticateToken, authorizeRoles('secretary'), secretaryController.getSecretaryController);
 //update by username

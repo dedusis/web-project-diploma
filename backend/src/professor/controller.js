@@ -10,6 +10,15 @@ const createProfessorController = async (req,res) => {
     }
 }
 
+const getAllProfessorsController = async (req, res) => {
+    try {
+        const professors = await professorService.getAllProfessors();
+        res.json(professors);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 const getProfessorController = async (req, res) => {
     try {
         const Professor = await professorService.getProfessorByUsername(req.params.username);
@@ -42,6 +51,7 @@ const updateProfessorController = async (req, res) => {
   
   export default{
     createProfessorController,
+    getAllProfessorsController,
     deleteProfessorController,
     getProfessorController,
     updateProfessorController

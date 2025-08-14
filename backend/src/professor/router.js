@@ -7,6 +7,9 @@ const router=express.Router();
 //create user (secretary)
 router.post('/', authenticateToken, authorizeRoles('secretary'), ProfessorController.createProfessorController);
 
+//Get all users (secretary)
+router.get('/', authenticateToken, authorizeRoles('secretary'), ProfessorController.getAllProfessorsController);
+
 //Ger user (secretary)
 router.get('/:username', authenticateToken, authorizeRoles('secretary'), ProfessorController.getProfessorController);
 

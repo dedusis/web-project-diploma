@@ -9,6 +9,15 @@ const createSecretaryController = async (req, res) => {
     }
 }
 
+const getAllSecretariesController = async (req, res) => {
+    try {
+        const secretaries = await secretaryService.getAllSecretaries();
+        res.json(secretaries);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 const getSecretaryController = async (req, res) => {
     try {
         const secretary = await secretaryService.getSecretaryByUsername(req.params.username);
@@ -41,6 +50,7 @@ const deleteSecretaryController = async (req, res) => {
 
 export default {
   createSecretaryController,
+  getAllSecretariesController,
   getSecretaryController,
   updateSecretaryController,
   deleteSecretaryController

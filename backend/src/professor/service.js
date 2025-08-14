@@ -25,6 +25,10 @@ const createProfessor = async(data) => {
     return await newProfessor.save();
 }
 
+const getAllProfessors = async () => {
+    return await Professor.find().select('-password');
+};
+
 const getProfessorByUsername = async (username) =>
 {
     return await Professor.findOne({username});
@@ -45,6 +49,7 @@ const deleteProfessorByUsername = async(username)=>{
 
 export default {
     createProfessor,
+    getAllProfessors,
     deleteProfessorByUsername,
     updateProfessorByUsername,
     getProfessorByUsername

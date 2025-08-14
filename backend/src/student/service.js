@@ -27,6 +27,11 @@ const createStudent = async (data) => {
   return await newStudent.save();
 };
 
+const getAllStudents = async () => {
+    return await Student.find().select('-password');
+};
+
+
 const getStudentByUsername = async (username) => {
   return await Student.findOne({ username });
 };
@@ -44,6 +49,7 @@ const deleteStudentByUsername = async (username) => {
 
 export default {
   createStudent,
+  getAllStudents,
   getStudentByUsername,
   updateStudentByUsername,
   deleteStudentByUsername

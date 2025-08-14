@@ -9,6 +9,16 @@ const createStudentController = async (req, res) => {
   }
 };
 
+const getAllStudentsController = async (req, res) => {
+    try {
+        const students = await studentService.getAllStudents();
+        res.json(students);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
 const getStudentController = async (req, res) => {
   try {
     const student = await studentService.getStudentByUsername(req.params.username);
@@ -47,6 +57,7 @@ const deleteStudentController = async (req, res) => {
 
 export default {
   createStudentController,
+  getAllStudentsController,
   getStudentController,
   updateStudentController,
   deleteStudentController
