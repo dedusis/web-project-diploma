@@ -1,0 +1,29 @@
+{
+  "students": [
+    { "username": "stud1", "password": "pass1234", "name": "Γιάννης", "surname": "Παπαδόπουλος", "student_number": "2025001", "email": "giannis1@example.com" },
+    { "username": "stud2", "password": "pass1234", "name": "Μαρία", "surname": "Νικολάου", "student_number": "2025002", "email": "maria@example.com" },
+    { "username": "stud3", "password": "pass1234", "name": "Κώστας", "surname": "Αντωνίου", "student_number": "2025003", "email": "kostas@example.com" },
+    { "username": "stud4", "password": "pass1234", "name": "Ελένη", "surname": "Σταθοπούλου", "student_number": "2025004", "email": "eleni@example.com" },
+    { "username": "stud5", "password": "pass1234", "name": "Δημήτρης", "surname": "Παναγιώτου", "student_number": "2025005", "email": "dimitris@example.com" },
+    { "username": "stud6", "password": "pass1234", "name": "Ανδρέας", "surname": "Χριστοδούλου", "student_number": "2025006", "email": "andreas@example.com" },
+    { "username": "stud7", "password": "pass1234", "name": "Κατερίνα", "surname": "Λάμπρου", "student_number": "2025007", "email": "katerina@example.com" },
+    { "username": "stud8", "password": "pass1234", "name": "Παναγιώτης", "surname": "Φωκάς", "student_number": "2025008", "email": "panos@example.com" },
+    { "username": "stud9", "password": "pass1234", "name": "Αγγελική", "surname": "Ρούσσου", "student_number": "2025009", "email": "aggeliki@example.com" },
+    { "username": "stud10", "password": "pass1234", "name": "Νίκος", "surname": "Αλεξίου", "student_number": "2025010", "email": "nikos@example.com" }
+  ],
+  "professors": [
+    { "username": "prof1", "password": "pass1234", "name": "Αντώνης", "surname": "Καραγιάννης", "topic": "Τεχνητή Νοημοσύνη", "landline": "2610123456", "mobile": "6912345678", "email": "antonis@example.com", "department": "Μηχανικών Η/Υ", "university": "Πανεπιστήμιο Πατρών" },
+    { "username": "prof2", "password": "pass1234", "name": "Γεωργία", "surname": "Πετροπούλου", "topic": "Δίκτυα Υπολογιστών", "landline": "2610123457", "mobile": "6912345679", "email": "georgia@example.com", "department": "Μηχανικών Η/Υ", "university": "Πανεπιστήμιο Πατρών" },
+    { "username": "prof3", "password": "pass1234", "name": "Μιχάλης", "surname": "Δημητρίου", "topic": "Ασφάλεια Πληροφοριών", "landline": "2610123458", "mobile": "6912345680", "email": "michalis@example.com", "department": "Μηχανικών Η/Υ", "university": "Πανεπιστήμιο Πατρών" },
+    { "username": "prof4", "password": "pass1234", "name": "Σοφία", "surname": "Παπακωνσταντίνου", "topic": "Βάσεις Δεδομένων", "landline": "2610123459", "mobile": "6912345681", "email": "sofia@example.com", "department": "Μηχανικών Η/Υ", "university": "Πανεπιστήμιο Πατρών" },
+    { "username": "prof5", "password": "pass1234", "name": "Χρήστος", "surname": "Μανωλάκης", "topic": "Λειτουργικά Συστήματα", "landline": "2610123460", "mobile": "6912345682", "email": "xristos@example.com", "department": "Μηχανικών Η/Υ", "university": "Πανεπιστήμιο Πατρών" }
+  ],
+  "theses": [
+    { "title": "Σύστημα Αναγνώρισης Προσώπου", "description": "Χρήση AI για αναγνώριση προσώπων σε πραγματικό χρόνο", "status": "pending", "professor": "prof1", "student": "stud1" },
+    { "title": "Ανάλυση Κυκλοφορίας Δικτύων", "description": "Συλλογή και ανάλυση δεδομένων δικτύου", "status": "approved", "professor": "prof2", "student": "stud2" },
+    { "title": "Σύστημα Πρόβλεψης Καιρού", "description": "Μοντέλα μηχανικής μάθησης για πρόβλεψη καιρού", "status": "completed", "professor": "prof3", "student": "stud3" },
+    { "title": "Διαχείριση Βάσεων Δεδομένων", "description": "Σχεδίαση και βελτιστοποίηση μεγάλων βάσεων δεδομένων", "status": "pending", "professor": "prof4", "student": "stud4" },
+    { "title": "Ανάλυση Κειμένου με NLP", "description": "Φυσική επεξεργασία κειμένου στα ελληνικά", "status": "approved", "professor": "prof5", "student": "stud5" },
+    { "title": "Συστήματα Κυβερνοασφάλειας", "description": "Ανίχνευση επιθέσεων και κακόβουλου λογισμικού", "status": "completed", "professor": "prof1", "student": "stud6" }
+  ]
+}

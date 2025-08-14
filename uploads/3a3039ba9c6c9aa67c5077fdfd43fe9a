@@ -1,0 +1,61 @@
+{
+  "students": [
+    {
+      "name": "Γιάννης",
+      "surname": "Παπαδόπουλος",
+      "student_number": "123499",
+      "street": "Αγίου Ανδρέου",
+      "number": "12",
+      "city": "Πάτρα",
+      "postcode": "26221",
+      "father_name": "Νικόλαος",
+      "landline_telephone": "2610123456",
+      "mobile_telephone": "6912345678",
+      "email": "giannis@example.com"
+    },
+    {
+      "name": "Μαρία",
+      "surname": "Κωνσταντίνου",
+      "student_number": "789012",
+      "street": "Κορίνθου",
+      "number": "45",
+      "city": "Πάτρα",
+      "postcode": "26222",
+      "father_name": "Παναγιώτης",
+      "landline_telephone": "2610223344",
+      "mobile_telephone": "6991122334",
+      "email": "maria@example.com"
+    }
+  ],
+  "professors": [
+    {
+      "name": "Ανδρέας",
+      "surname": "Πετρόπουλος",
+      "topic": "Τεχνητή Νοημοσύνη",
+      "landline": "2610334455",
+      "mobile": "6992233445",
+      "email": "andreas@example.com",
+      "department": "Πληροφορικής",
+      "university": "Πανεπιστήμιο Πατρών"
+    },
+    {
+      "name": "Ελένη",
+      "surname": "Δημητρίου",
+      "topic": "Ασφάλεια Δικτύων",
+      "landline": "2610445566",
+      "mobile": "6993344556",
+      "email": "eleni@example.com",
+      "department": "Μηχανικών Η/Υ",
+      "university": "Πανεπιστήμιο Πατρών"
+    }
+  ],
+  "theses": [
+    {
+      "title": "Ανάπτυξη Συστήματος AI",
+      "description": "Εφαρμογή τεχνητής νοημοσύνης για ανάλυση δεδομένων",
+      "status": "pending",
+      "professor": "64f1c2c5a7e8a21b9c123456",
+      "student": "64f1c2c5a7e8a21b9c654321"
+    }
+  ]
+}

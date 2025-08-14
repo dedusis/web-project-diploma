@@ -331,9 +331,10 @@ paths:
         '404':
           description: Secretary not found
 
-  /import:
+  /import/upload:
     post:
-      summary: Import students, professors, and theses from file
+      summary: Import data from JSON file
+      description: Upload a JSON file containing students, professors, and/or theses. Only secretaries can perform this action.
       tags:
         - Import
       security:
@@ -348,23 +349,44 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: JSON file containing data to import
+                  description: JSON file containing the data to import
       responses:
-        '201':
-          description: Import successful
+        '200':
+          description: Import completed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImportLog'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Import completed successfully
+                  summary:
+                    type: object
+                    properties:
+                      students:
+                        type: integer
+                        example: 10
+                      professors:
+                        type: integer
+                        example: 5
         '400':
-          description: Invalid file or data
+          description: No file uploaded or invalid file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not authorized
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /import:
     get:
       summary: Get all import logs
+      description: Retrieve a list of all import logs. Only secretaries can view this.
       tags:
         - Import
       security:
@@ -378,6 +400,87 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ImportLog'
+        '403':
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /import/{id}:
+    get:
+      summary: Get an import log by ID
+      description: Retrieve details for a specific import log by ID. Only secretaries can view this.
+      tags:
+        - Import
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Import log ID
+          example: 64f1c2c5a7e8a21b9c123456
+      responses:
+        '200':
+          description: Import log details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportLog'
+        '404':
+          description: Import log not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete an import log by ID
+      description: Permanently remove an import log. Only secretaries can delete logs.
+      tags:
+        - Import
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Import log ID
+          example: 64f1c2c5a7e8a21b9c123456
+      responses:
+        '200':
+          description: Import log deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: ImportLog deleted successfully
+        '404':
+          description: Import log not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /student:
     post:
@@ -694,18 +797,36 @@ components:
       properties:
         _id:
           type: string
-          example: 64f1c2c5a7e8a21b9c111111
+          example: 64f1c2c5a7e8a21b9c123456
         filename:
           type: string
           example: students_batch_01.json
+        type:
+          type: string
+          enum: [students, professors, mixed]
+          example: mixed
+        description:
+          type: string
+          example: Import from secretary's batch file
         importDate:
           type: string
           format: date-time
           example: 2025-08-13T10:00:00.000Z
         importedBy:
-          type: string
-          description: ID of the secretary who performed the import
-          example: 64f1c2c5a7e8a21b9c222222
+          type: object
+          properties:
+            _id:
+              type: string
+              example: 64f1b123a7e8a21b9c654321
+            username:
+              type: string
+              example: secr1
+            name:
+              type: string
+              example: Ελένη Γραμματεία
+            email:
+              type: string
+              example: eleni@upatras.gr
         summary:
           type: object
           properties:
@@ -715,18 +836,13 @@ components:
             professors:
               type: integer
               example: 5
-            theses:
-              type: integer
-              example: 3
         createdAt:
           type: string
           format: date-time
-          example: 2025-08-13T10:00:00.000Z
         updatedAt:
           type: string
           format: date-time
-          example: 2025-08-13T10:05:00.000Z
-
+    
     Student:
       type: object
       properties:
