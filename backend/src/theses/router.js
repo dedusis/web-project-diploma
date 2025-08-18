@@ -42,4 +42,11 @@ router.delete(
   thesesController.deleteThesesController
 );
 
+router.post(
+  '/:id/assign',
+  authenticateToken,
+  authorizeRoles('professor','secretary'),
+  thesesController.assignThesesController // Assign thesis to student (professor ή secretary)
+);
+
 export default router;

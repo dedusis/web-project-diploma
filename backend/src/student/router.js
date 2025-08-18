@@ -19,4 +19,5 @@ router.put('/:username', authenticateToken, authorizeRoles('secretary'), student
 //Delete user (secretary)
 router.delete('/:username', authenticateToken, authorizeRoles('secretary'), studentController.deleteStudentController);
 
+router.get('/id/:id', authenticateToken, authorizeRoles('secretary'), studentController.getStudentByIdController);
 export default router;

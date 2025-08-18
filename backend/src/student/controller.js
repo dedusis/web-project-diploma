@@ -31,8 +31,22 @@ const getStudentController = async (req, res) => {
   }
 };
 
+const getStudentByIdController = async (req, res) => {
+  try {
+    const student = await studentService.getStudentById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    res.json(student);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const updateStudentController = async (req, res) => {
   try {
+    const username= req.params.username;
+    const updates = req.body;
     const updated = await studentService.updateStudentByUsername(req.params.username, req.body);
     if (!updated) {
       return res.status(404).json({ error: 'Student not found' });
@@ -60,5 +74,6 @@ export default {
   getAllStudentsController,
   getStudentController,
   updateStudentController,
+  getStudentByIdController,
   deleteStudentController
 };

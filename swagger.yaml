@@ -27,10 +27,10 @@ paths:
               properties:
                 username:
                   type: string
-                  example: stud1
+                  example: secr2
                 password:
                   type: string
-                  example: pass1234
+                  example: test124
       responses:
         '200':
           description: Login successful
@@ -642,7 +642,34 @@ paths:
           description: Student deleted successfully
         '404':
           description: Student not found
-
+  /student/id/{id}:
+    get:
+      summary: Get a student by ID
+      description: Retrieve a student by database ID (not username). Password field is excluded.
+      tags:
+        - Student
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1d4c5a7e8a21b9c654321
+      responses:
+        '200':
+          description: Student found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /theses:
     post:
       summary: Create a new theses
@@ -751,6 +778,53 @@ paths:
           description: Theses not found
         '403':
           description: Not authorized
+  /theses/{id}/assign:
+    post:
+      summary: Assign a thesis to a student
+      description: Assigns a thesis to a student by IDs. Only professors or secretaries can perform this action.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Thesis ID
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - studentId
+              properties:
+                studentId:
+                  type: string
+                  example: 64f1d4c5a7e8a21b9c654321
+      responses:
+        '200':
+          description: Thesis assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '404':
+          description: Thesis or student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -1039,7 +1113,6 @@ components:
       required:
         - title
         - professor
-        - student
       properties:
         title:
           type: string
@@ -1049,8 +1122,7 @@ components:
           type: string
         professor:
           type: string
-        student:
-          type: string
+        
 
     UpdateThesesRequest:
       type: object

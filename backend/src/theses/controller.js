@@ -2,12 +2,22 @@ import thesesService from "./service.js";
 
 const createThesesController = async (req, res) => {
   try {
-    const theses = await thesesService.createTheses(req.body);
-    res.status(201).json(theses);
-  } catch (err) {
+    const{title, description, status, professor,student} = req.body;
+
+    const thesesData = {
+      title,
+      description,
+      status,
+      professor,
+    };
+    const newThesis = await thesesService.createTheses(thesesData); 
+    res.status(201).json(newThesis);
+  }
+  catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
+
 
 const getAllThesesController = async (req, res) => {
   try {
@@ -48,10 +58,21 @@ const deleteThesesController = async (req, res) => {
   }
 };
 
+const assignThesesController = async (req, res) => {
+    const thesesId = req.params.id; 
+    const { studentId } = req.body;
+    try {
+        const updatedTheses = await thesesService.assignThesesToStudent(thesesId, studentId);
+        res.status(200).json(updatedTheses);
+    } catch (err) {
+    res.status(400).json({ error: err.message });
+    }
+};
 export default {
   createThesesController,
   getAllThesesController,
   getThesesByIdController,
   updateThesesController,
+  assignThesesController,
   deleteThesesController,
 };

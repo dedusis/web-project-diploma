@@ -64,6 +64,7 @@ const studentSchema = new mongoose.Schema(
       lowercase: true,
       trim: true
     }
+    
   },
   {
     timestamps: true

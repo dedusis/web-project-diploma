@@ -13,7 +13,7 @@ const thesesSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "completed"],
+      enum: ["pending", "approved", "completed","rejected"],
       default: "pending"
     },
     assignedDate: {
@@ -28,11 +28,13 @@ const thesesSchema = new mongoose.Schema(
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      required: true
+      default: null
+    },
+
+    committeeApproval: {
+      type: Boolean,
+      default: false
     }
-  },
-  {
-    timestamps: true
   }
 );
 

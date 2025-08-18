@@ -31,6 +31,9 @@ const getAllStudents = async () => {
     return await Student.find().select('-password');
 };
 
+const getStudentById = async (id) => {
+  return await Student.findById(id).select('-password');
+};  
 
 const getStudentByUsername = async (username) => {
   return await Student.findOne({ username });
@@ -47,9 +50,12 @@ const deleteStudentByUsername = async (username) => {
   return await Student.findOneAndDelete({ username });
 };
 
+
+
 export default {
   createStudent,
   getAllStudents,
+  getStudentById,
   getStudentByUsername,
   updateStudentByUsername,
   deleteStudentByUsername
