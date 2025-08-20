@@ -1299,8 +1299,6 @@ components:
           type: string
         description:
           type: string
-        status:
-          type: string
         professor:
           type: string
         
