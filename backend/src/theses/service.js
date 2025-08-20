@@ -93,6 +93,26 @@ const completeThesis = async (id, { grade, nymerti_link }) => {
     { new: true }
   );
 };
+
+//function for get my thesis
+const getThesisByStudent = async (studentId) => {
+  const thesis = await Theses.findOne({ student: studentId })
+    .populate("professor", "name surname email")
+    .populate("student", "name surname email");
+
+  if (!thesis) {
+    throw new Error("No thesis found for this student");
+  }
+
+  // calc days from assign
+  const daysSinceAssignment = thesis.assignedDate
+    ? Math.floor((Date.now() - thesis.assignedDate) / (1000 * 60 * 60 * 24))
+    : null;
+
+  return { ...thesis.toObject(), daysSinceAssignment };
+};
+
+
 export default {
   createTheses,
   getAllTheses,
@@ -103,4 +123,5 @@ export default {
   activateThesis,
   cancelThesis,
   completeThesis,
+  getThesisByStudent
 };

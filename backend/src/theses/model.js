@@ -46,6 +46,13 @@ const thesesSchema = new mongoose.Schema(
     },
     nimertis_link: {
       type: String 
+    },
+    committee: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Professor"
+    }],
+    attachment: {
+      type: String // π.χ. URL αρχείου PDF
     }
   },
   {

@@ -91,6 +91,20 @@ const completeThesisController = async (req, res) => {
   }
 };
 
+//function for get mythesis
+const getMyThesisController = async (req, res) => {
+  try {
+    const thesis = await thesesService.getThesisByStudent(req.user.id);
+    res.json(thesis);
+  } catch (err) {
+    if (err.message.includes("No thesis")) {
+      return res.status(404).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 export default {
   createThesesController,
@@ -102,4 +116,5 @@ export default {
   activateThesisController,
   cancelThesisController,
   completeThesisController,
+    getMyThesisController
 };

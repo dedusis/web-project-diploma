@@ -19,6 +19,14 @@ router.get(
   thesesController.getAllThesesController
 );
 
+//get mythesis
+router.get(
+  "/me",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.getMyThesisController
+);
+
 // Get theses by id (logged in users)
 router.get(
   '/:id',
@@ -68,5 +76,6 @@ router.patch(
   authorizeRoles("secretary"),
   thesesController.completeThesisController
 );
+
 
 export default router;

@@ -827,6 +827,74 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /theses/me:
+    get:
+      summary: Get the logged-in student's thesis
+      description: Returns the thesis details for the currently authenticated student.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thesis details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  title:
+                    type: string
+                    example: Ανάπτυξη Συστήματος Τεχνητής Νοημοσύνης
+                  description:
+                    type: string
+                    example: Περιγραφή διπλωματικής εργασίας
+                  status:
+                    type: string
+                    enum: [pending, active, under_review, completed, cancelled]
+                    example: active
+                  professor:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: Γιάννης
+                      surname:
+                        type: string
+                        example: Παπαδόπουλος
+                      email:
+                        type: string
+                        example: giannis@example.com
+                  committee:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: Μαρία
+                        surname:
+                          type: string
+                          example: Κωνσταντίνου
+                        email:
+                          type: string
+                          example: maria@example.com
+                  attachment:
+                    type: string
+                    example: "http://localhost:3000/uploads/thesis123.pdf"
+                  assignedDate:
+                    type: string
+                    format: date-time
+                  daysSinceAssignment:
+                    type: integer
+                    example: 45
+        '401':
+          description: Unauthorized (no or invalid token)
+        '404':
+          description: No thesis found for this student
+
   /theses/{id}/activate:
     patch:
       summary: activate thesis assignment (by Secretary)
