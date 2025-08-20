@@ -13,7 +13,7 @@ const thesesSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "completed","rejected"],
+      enum: ["pending", "active", "under_review", "completed", "cancelled"],
       default: "pending"
     },
     assignedDate: {
@@ -30,11 +30,26 @@ const thesesSchema = new mongoose.Schema(
       ref: "Student",
       default: null
     },
-
-    committeeApproval: {
-      type: Boolean,
-      default: false
+    ap_number: {
+      type: Number 
+    },
+    ap_year: {
+      type: Number 
+    },
+    cancel_reason: {
+      type: String 
+    },
+    grade: {
+      type: Number,
+      min: 0,
+      max: 10 
+    },
+    nimertis_link: {
+      type: String 
     }
+  },
+  {
+    timestamps: true
   }
 );
 

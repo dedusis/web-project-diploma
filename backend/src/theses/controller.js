@@ -2,21 +2,12 @@ import thesesService from "./service.js";
 
 const createThesesController = async (req, res) => {
   try {
-    const{title, description, status, professor,student} = req.body;
-
-    const thesesData = {
-      title,
-      description,
-      status,
-      professor,
-    };
-    const newThesis = await thesesService.createTheses(thesesData); 
-    res.status(201).json(newThesis);
-  }
-  catch (err) {
+    const theses = await thesesService.createTheses(req.body);
+    res.status(201).json(theses);
+  } catch (err) {
     res.status(400).json({ error: err.message });
   }
-};
+};;
 
 
 const getAllThesesController = async (req, res) => {
@@ -68,6 +59,39 @@ const assignThesesController = async (req, res) => {
     res.status(400).json({ error: err.message });
     }
 };
+
+//secr actions
+const activateThesisController = async (req, res) => {
+  try {
+    const updated = await thesesService.activateThesis(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ error: "Thesis not found" });
+    res.json({ message: "Thesis activated successfully", thesis: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const cancelThesisController = async (req, res) => {
+  try {
+    const updated = await thesesService.cancelThesis(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ error: "Thesis not found" });
+    res.json({ message: "Thesis canceled successfully", thesis: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const completeThesisController = async (req, res) => {
+  try {
+    const updated = await thesesService.completeThesis(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ error: "Thesis not found" });
+    res.json({ message: "Thesis marked as completed", thesis: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -75,4 +99,7 @@ export default {
   updateThesesController,
   assignThesesController,
   deleteThesesController,
+  activateThesisController,
+  cancelThesisController,
+  completeThesisController,
 };

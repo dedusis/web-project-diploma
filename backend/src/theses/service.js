@@ -56,6 +56,43 @@ const assignThesesToStudent = async (thesesId, studentId) => {
   return theses;
 };
 
+//secr actions
+const activateThesis = async (id, { ap_number, ap_year }) => {
+  return await Theses.findByIdAndUpdate(
+    id,
+    {
+      status: "active",
+      ap_number,
+      ap_year,
+    },
+    { new: true }
+  );
+};
+
+const cancelThesis = async (id, { ap_number, ap_year, reason }) => {
+  return await Theses.findByIdAndUpdate(
+    id,
+    {
+      status: "canceled",
+      ap_number,
+      ap_year,
+      cancel_reason: reason,
+    },
+    { new: true }
+  );
+};
+
+const completeThesis = async (id, { grade, nymerti_link }) => {
+  return await Theses.findByIdAndUpdate(
+    id,
+    {
+      status: "completed",
+      grade,
+      nymerti_link,
+    },
+    { new: true }
+  );
+};
 export default {
   createTheses,
   getAllTheses,
@@ -63,4 +100,7 @@ export default {
   updateTheses,
   assignThesesToStudent,
   deleteTheses,
+  activateThesis,
+  cancelThesis,
+  completeThesis,
 };

@@ -49,4 +49,24 @@ router.post(
   thesesController.assignThesesController // Assign thesis to student (professor ή secretary)
 );
 
+//secr actions
+router.patch(
+  "/:id/activate",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.activateThesisController
+);
+router.patch(
+  "/:id/cancel",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.cancelThesisController
+);
+router.patch(
+  "/:id/complete",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.completeThesisController
+);
+
 export default router;

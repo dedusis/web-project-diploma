@@ -778,6 +778,7 @@ paths:
           description: Theses not found
         '403':
           description: Not authorized
+
   /theses/{id}/assign:
     post:
       summary: Assign a thesis to a student
@@ -825,6 +826,135 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /theses/{id}/activate:
+    patch:
+      summary: activate thesis assignment (by Secretary)
+      description: Η Γραμματεία εγκρίνει την ανάθεση διπλωματικής, καταχωρώντας τον αριθμό και το έτος της ΓΣ.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ap_number
+                - ap_year
+              properties:
+                ap_number:
+                  type: string
+                  example: "15"
+                ap_year:
+                  type: string
+                  example: "2024"
+      responses:
+        '200':
+          description: Thesis activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '403':
+          description: Not authorized
+
+  /theses/{id}/cancel:
+    patch:
+      summary: Cancel thesis assignment (by Secretary)
+      description: Η Γραμματεία ακυρώνει την ανάθεση διπλωματικής, με καταχώρηση ΓΣ και λόγου ακύρωσης.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ap_number
+                - ap_year
+                - cancel_reason
+              properties:
+                ap_number:
+                  type: string
+                  example: "22"
+                ap_year:
+                  type: string
+                  example: "2024"
+                cancel_reason:
+                  type: string
+                  example: "Κατόπιν αίτησης φοιτητή"
+      responses:
+        '200':
+          description: Thesis cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '403':
+          description: Not authorized
+
+  /theses/{id}/complete:
+    patch:
+      summary: Complete thesis (by Secretary)
+      description: Η Γραμματεία ολοκληρώνει τη διπλωματική, καταχωρώντας βαθμό και σύνδεσμο στο Νημερτή.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - grade
+                - nimertis_link
+              properties:
+                grade:
+                  type: number
+                  format: float
+                  example: 8.5
+                nimertis_link:
+                  type: string
+                  format: uri
+                  example: "https://nemertes.lis.upatras.gr/jspui/handle/10889/12345"
+      responses:
+        '200':
+          description: Thesis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '403':
+          description: Not authorized
 
 components:
   securitySchemes:
@@ -994,28 +1124,40 @@ components:
           type: string
         username:
           type: string
+          example: stud1
         name:
           type: string
+          example: leo
         surname:
           type: string
+          example: ded
         student_number:
           type: string
+          example: 1104780
         street:
           type: string
+          example: kronou
         number:
           type: string
+          example: 6969696969
         city:
           type: string
+          example: Patra
         postcode:
           type: string
+          example: 1148
         father_name:
           type: string
+          example: leo
         landline_telephone:
           type: string
+          example: 2102102102
         mobile_telephone:
           type: string
+          example: 888888888
         email:
           type: string
+          example: leo@adjudhj.gr
         createdAt:
           type: string
         updatedAt:
@@ -1033,30 +1175,43 @@ components:
       properties:
         username:
           type: string
+          example: stud1
         password:
           type: string
+          example: test1234
         name:
           type: string
+          example: leo
         surname:
           type: string
+          example: ded
         student_number:
           type: string
+          example: 8888888
         street:
           type: string
+          example: kronou
         number:
           type: string
+          example: 6969696969
         city:
           type: string
+          example: Patra
         postcode:
           type: string
+          example: 11233
         father_name:
           type: string
+          example: leo
         landline_telephone:
           type: string
+          example: 2222222222
         mobile_telephone:
           type: string
+          example: 8888888888
         email:
           type: string
+          example: leo@leoleo.gr
 
     UpdateStudentRequest:
       type: object
@@ -1097,16 +1252,42 @@ components:
           type: string
         status:
           type: string
+          enum: [pending, active, under_review, completed, cancelled]
         assignedDate:
           type: string
+          format: date-time
         professor:
           type: string
         student:
           type: string
+        ap_number:
+          type: string
+          description: Αριθμός Γενικής Συνέλευσης
+          example: "15"
+        ap_year:
+          type: string
+          description: Έτος Γενικής Συνέλευσης
+          example: "2024"
+        cancel_reason:
+          type: string
+          description: Λόγος ακύρωσης ανάθεσης
+          example: "Κατόπιν αίτησης φοιτητή"
+        grade:
+          type: number
+          format: float
+          description: Βαθμός διπλωματικής
+          example: 8.5
+        nimertis_link:
+          type: string
+          format: uri
+          description: Σύνδεσμος προς το αποθετήριο Νημερτής
+          example: "https://nemertes.lis.upatras.gr/jspui/handle/10889/12345"
         createdAt:
           type: string
+          format: date-time
         updatedAt:
           type: string
+          format: date-time
 
     CreateThesesRequest:
       type: object
@@ -1133,3 +1314,5 @@ components:
           type: string
         status:
           type: string
+
+    
