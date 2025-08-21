@@ -69,11 +69,34 @@ const deleteStudentController = async (req, res) => {
   }
 };
 
+//update my profile
+const updateOwnProfileController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const updates = req.body;
+
+    const updatedStudent = await studentService.updateOwnProfile(userId, updates);
+
+    if (!updatedStudent) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    res.json({
+      message: "Profile updated successfully",
+      student: updatedStudent
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
 export default {
   createStudentController,
   getAllStudentsController,
   getStudentController,
   updateStudentController,
   getStudentByIdController,
-  deleteStudentController
+  deleteStudentController,
+  updateOwnProfileController
 };

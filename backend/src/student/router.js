@@ -20,4 +20,13 @@ router.put('/:username', authenticateToken, authorizeRoles('secretary'), student
 router.delete('/:username', authenticateToken, authorizeRoles('secretary'), studentController.deleteStudentController);
 
 router.get('/id/:id', authenticateToken, authorizeRoles('secretary'), studentController.getStudentByIdController);
+
+//update my profile
+router.patch(
+  '/me',
+  authenticateToken,
+  authorizeRoles('student'),
+  studentController.updateOwnProfileController
+);
+
 export default router;
