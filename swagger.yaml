@@ -801,6 +801,58 @@ paths:
         '401':
           description: Unauthorized
 
+  /theses/me/invite:
+    patch:
+      summary: Student invites professors to committee
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+                    example: "professor1@uni.gr"
+      responses:
+        '200':
+          description: Invitations sent
+
+  /theses/{id}/respond:
+    patch:
+      summary: Professor responds to committee invitation
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Thesis ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                response:
+                  type: string
+                  enum: [accepted, rejected]
+                  example: accepted
+      responses:
+        '200':
+          description: Invitation response recorded
+
   /theses/{id}:
     get:
       summary: Get theses by ID

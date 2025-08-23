@@ -77,5 +77,20 @@ router.patch(
   thesesController.completeThesisController
 );
 
+//student sends invitation
+router.patch(
+  "/me/invite",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.inviteProfessorsController
+);
+
+//prof respond
+router.patch(
+  "/:id/respond",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.respondInvitationController
+);
 
 export default router;

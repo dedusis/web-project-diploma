@@ -1,5 +1,6 @@
 import Theses from "./model.js";
 import Student from "../student/model.js";
+import Professor from "../professor/model.js";
 import mongoose from "mongoose";
 
 const createTheses = async (data) => {
@@ -112,6 +113,74 @@ const getThesisByStudent = async (studentId) => {
   return { ...thesis.toObject(), daysSinceAssignment };
 };
 
+//student invites professor
+const inviteProfessors = async (studentId, professorEmails) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "pending") {
+    throw new Error("Committee can only be set while thesis is pending");
+  }
+
+  //find prof by email
+  const professors = await Professor.find({ email: { $in: professorEmails } });
+  if (professors.length === 0) {
+    throw new Error("No professors found with these emails");
+  }
+
+  professors.forEach((prof) => {
+    const existingInvitation = thesis.committee.find(
+      (inv) => inv.professor.toString() === prof._id.toString()
+    );
+    if (existingInvitation) {
+      if (existingInvitation.status === "rejected") {
+        existingInvitation.status = "pending";
+      }
+    } else {
+      thesis.committee.push({
+        professor: prof._id,
+        status: "pending"
+      });
+    }
+  });
+
+  await thesis.save();
+  return thesis.populate("committee.professor", "name surname email");
+};
+
+//prof accept or reject
+const respondInvitation = async (professorId, thesisId, response) => {
+  const thesis = await Theses.findById(thesisId);
+  if (!thesis) throw new Error("Thesis not found");
+
+  const invitation = thesis.committee.find(
+    (inv) => inv.professor.toString() === professorId.toString()
+  );
+  if (!invitation) throw new Error("No invitation found for this professor");
+
+  if (invitation.status === "rejected") {
+    throw new Error("This invitation has been rejected and cannot be changed");
+  }
+
+  invitation.status = response; // "accepted" or "rejected"
+
+  // if >= 2 accepted -> thesis.active
+  const acceptedCount = thesis.committee.filter(
+    (inv) => inv.status === "accepted"
+  ).length;
+
+  if (acceptedCount >= 2) {
+    thesis.status = "active";
+    thesis.assignedDate = new Date();
+  } else {
+    thesis.status = "pending"; // <--- γύρνα το πάλι σε pending
+  }
+
+
+  await thesis.save();
+  return thesis.populate("committee.professor", "name surname email");
+};
+
 
 export default {
   createTheses,
@@ -123,5 +192,7 @@ export default {
   activateThesis,
   cancelThesis,
   completeThesis,
-  getThesisByStudent
+  getThesisByStudent,
+  inviteProfessors,
+  respondInvitation
 };

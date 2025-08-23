@@ -104,6 +104,40 @@ const getMyThesisController = async (req, res) => {
   }
 };
 
+// Student invites professors
+const inviteProfessorsController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { emails } = req.body; // prof emails
+
+    const updatedThesis = await thesesService.inviteProfessors(studentId, emails);
+
+    res.json({
+      message: "Invitations sent successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Professor responds to invitation
+const respondInvitationController = async (req, res) => {
+  try {
+    const professorId = req.user.id;
+    const thesisId = req.params.id;
+    const { response } = req.body; // accepted | rejected
+
+    const updatedThesis = await thesesService.respondInvitation(professorId, thesisId, response);
+
+    res.json({
+      message: `Invitation ${response}`,
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
 
 
 export default {
@@ -116,5 +150,7 @@ export default {
   activateThesisController,
   cancelThesisController,
   completeThesisController,
-    getMyThesisController
+  getMyThesisController,
+  inviteProfessorsController,
+  respondInvitationController
 };

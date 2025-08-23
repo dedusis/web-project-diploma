@@ -48,8 +48,8 @@ const thesesSchema = new mongoose.Schema(
       type: String 
     },
     committee: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Professor"
+      professor: { type: mongoose.Schema.Types.ObjectId, ref: "Professor" },
+      status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" }
     }],
     attachment: {
       type: String // π.χ. URL αρχείου PDF
