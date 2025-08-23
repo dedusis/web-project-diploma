@@ -19,6 +19,7 @@ router.get(
   thesesController.getAllThesesController
 );
 
+
 // Get theses by id (logged in users)
 router.get(
   '/:id',

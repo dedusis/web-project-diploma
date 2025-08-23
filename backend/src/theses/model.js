@@ -31,7 +31,13 @@ const thesesSchema = new mongoose.Schema(
       default: null
     },
 
-    committeeApproval: {
+    statusHistory:[{
+      status: String,
+      date: { type: Date, default: Date.now }
+    }],
+
+    committeeApproval: 
+    { 
       type: Boolean,
       default: false
     }
