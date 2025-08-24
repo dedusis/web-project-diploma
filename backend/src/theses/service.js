@@ -173,7 +173,7 @@ const respondInvitation = async (professorId, thesisId, response) => {
     thesis.status = "active";
     thesis.assignedDate = new Date();
   } else {
-    thesis.status = "pending"; // <--- γύρνα το πάλι σε pending
+    thesis.status = "pending"; 
   }
 
 
@@ -181,6 +181,21 @@ const respondInvitation = async (professorId, thesisId, response) => {
   return thesis.populate("committee.professor", "name surname email");
 };
 
+const uploadDraft = async (studentId, { draftFile, extraLinks }) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "active") {
+    throw new Error("Draft can only be uploaded when thesis is active");
+  }
+
+  thesis.draftFile = draftFile || thesis.draftFile;
+  thesis.extraLinks = extraLinks || thesis.extraLinks;
+  thesis.status = "under_review"; 
+
+  await thesis.save();
+  return thesis;
+};
 
 export default {
   createTheses,
@@ -194,5 +209,6 @@ export default {
   completeThesis,
   getThesisByStudent,
   inviteProfessors,
-  respondInvitation
+  respondInvitation,
+  uploadDraft
 };

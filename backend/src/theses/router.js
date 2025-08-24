@@ -93,4 +93,11 @@ router.patch(
   thesesController.respondInvitationController
 );
 
+router.patch(
+  "/me/draft",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.uploadDraftController
+);
+
 export default router;

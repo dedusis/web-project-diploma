@@ -139,6 +139,21 @@ const respondInvitationController = async (req, res) => {
   }
 };
 
+const uploadDraftController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { draftFile, extraLinks } = req.body;
+
+    const updatedThesis = await thesesService.uploadDraft(studentId, { draftFile, extraLinks });
+
+    res.json({
+      message: "Draft uploaded successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
 
 export default {
   createThesesController,
@@ -152,5 +167,6 @@ export default {
   completeThesisController,
   getMyThesisController,
   inviteProfessorsController,
-  respondInvitationController
+  respondInvitationController,
+  uploadDraftController
 };

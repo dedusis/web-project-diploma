@@ -52,8 +52,15 @@ const thesesSchema = new mongoose.Schema(
       status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" }
     }],
     attachment: {
-      type: String // π.χ. URL αρχείου PDF
-    }
+      type: String // URL document PDF
+    },
+    draftFile: { 
+      type: String // URL / filename 
+    }, 
+    extraLinks: [String],
+    examDate: { type: Date },
+    examMode: { type: String, enum: ["in_person", "online"] },
+    examLocation: { type: String }, 
   },
   {
     timestamps: true

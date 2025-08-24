@@ -1039,6 +1039,74 @@ paths:
         '404':
           description: No thesis found for this student
 
+  /theses/me/draft:
+    patch:
+      summary: Student uploads draft thesis file and additional links
+      description: >
+        Ο φοιτητής ανεβάζει το πρόχειρο κείμενο (ως URL/path αρχείου)
+        και προαιρετικά συνδέσμους προς εξωτερικό υλικό (Google Drive, YouTube κλπ).
+        Με την καταχώρηση, η διπλωματική περνάει σε status **under_review**.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                draftFile:
+                  type: string
+                  example: "https://fileserver.com/thesis_draft_123.pdf"
+                extraLinks:
+                  type: array
+                  items:
+                    type: string
+                  example: ["https://drive.google.com/file/xyz", "https://youtu.be/abcd1234"]
+      responses:
+        '200':
+          description: Draft uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Draft uploaded successfully"
+                  thesis:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "68a63250f91675bd18b2fb60"
+                      title:
+                        type: string
+                        example: "Εφαρμογή Τεχνητής Νοημοσύνης σε Ιατρικές Διαγνώσεις"
+                      status:
+                        type: string
+                        example: "under_review"
+                      draftFile:
+                        type: string
+                        example: "https://fileserver.com/thesis_draft_123.pdf"
+                      extraLinks:
+                        type: array
+                        items:
+                          type: string
+                        example: ["https://drive.google.com/file/xyz", "https://youtu.be/abcd1234"]
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No thesis found for this student"
+
   /theses/{id}/activate:
     patch:
       summary: activate thesis assignment (by Secretary)
