@@ -100,4 +100,12 @@ router.patch(
   thesesController.uploadDraftController
 );
 
+// Student sets exam details
+router.patch(
+  "/me/exam",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.setExamDetailsController
+);
+
 export default router;

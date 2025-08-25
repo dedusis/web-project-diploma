@@ -155,6 +155,27 @@ const uploadDraftController = async (req, res) => {
   }
 };
 
+// Student sets exam details
+const setExamDetailsController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { examDate, examMode, examLocation } = req.body;
+
+    const updatedThesis = await thesesService.setExamDetails(studentId, {
+      examDate,
+      examMode,
+      examLocation
+    });
+
+    res.json({
+      message: "Exam details set successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -168,5 +189,6 @@ export default {
   getMyThesisController,
   inviteProfessorsController,
   respondInvitationController,
-  uploadDraftController
+  uploadDraftController,
+  setExamDetailsController
 };

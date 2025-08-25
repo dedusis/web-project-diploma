@@ -1107,6 +1107,52 @@ paths:
                     type: string
                     example: "No thesis found for this student"
 
+  /theses/me/exam:
+    patch:
+      summary: "Student sets exam details"
+      description: >
+        Ο φοιτητής καταχωρεί ημερομηνία, τρόπο και χώρο εξέτασης. 
+        Επιτρέπεται μόνο όταν η διπλωματική είναι σε κατάσταση "under_review".
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                examDate:
+                  type: string
+                  format: date-time
+                  example: "2025-09-15T10:00:00.000Z"
+                examMode:
+                  type: string
+                  enum: ["in_person", "online"]
+                  example: "in_person"
+                examLocation:
+                  type: string
+                  example: "Αίθουσα Β2, Τμήμα Πληροφορικής"
+      responses:
+        "200":
+          description: "Exam details set successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Exam details set successfully"
+                  theses:
+                    $ref: "#/components/schemas/Theses"
+        "400":
+          description: "Bad request (e.g. thesis not under review)"
+        "404":
+          description: "Thesis not found"
+
   /theses/{id}/activate:
     patch:
       summary: activate thesis assignment (by Secretary)

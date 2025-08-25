@@ -197,6 +197,23 @@ const uploadDraft = async (studentId, { draftFile, extraLinks }) => {
   return thesis;
 };
 
+// Student sets exam details
+const setExamDetails = async (studentId, { examDate, examMode, examLocation }) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "under_review") {
+    throw new Error("Exam details can only be set when thesis is under review");
+  }
+
+  thesis.examDate = examDate;
+  thesis.examMode = examMode;
+  thesis.examLocation = examLocation;
+
+  await thesis.save();
+  return thesis;
+};
+
 export default {
   createTheses,
   getAllTheses,
@@ -210,5 +227,6 @@ export default {
   getThesisByStudent,
   inviteProfessors,
   respondInvitation,
-  uploadDraft
+  uploadDraft,
+  setExamDetails
 };
