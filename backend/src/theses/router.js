@@ -108,4 +108,27 @@ router.patch(
   thesesController.setExamDetailsController
 );
 
+// Professor sets grade
+router.patch(
+  "/:id/open-grading",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.openGradingController
+);
+
+//prof adds grade
+router.patch(
+  "/:id/grade",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.setGradeController
+);
+
+//get grades
+router.get("/:id/grades",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.getGradesController
+);
+
 export default router;

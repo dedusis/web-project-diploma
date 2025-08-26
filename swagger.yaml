@@ -1076,7 +1076,7 @@ paths:
                   message:
                     type: string
                     example: "Draft uploaded successfully"
-                  thesis:
+                theses:
                     type: object
                     properties:
                       _id:
@@ -1152,6 +1152,229 @@ paths:
           description: "Bad request (e.g. thesis not under review)"
         "404":
           description: "Thesis not found"
+
+  /theses/{id}/open-grading:
+    patch:
+      summary: Supervisor opens grading for the thesis
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Thesis ID
+      responses:
+        "200":
+          description: Grading opened successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Grading is now open for this thesis
+                  theses:
+                    $ref: "#/components/schemas/Theses"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /theses/{id}/grade:
+    patch:
+      summary: Set grada for thesis 
+      tags:
+        - Theses
+      description: >
+        Ο επιβλέπων καθηγητής ή μέλος της τριμελούς καταχωρεί βαθμό για τη διπλωματική.
+        Το `total` υπολογίζεται αυτόματα από τα κριτήρια. Όταν όλοι οι 3 καθηγητές βαθμολογήσουν,
+        υπολογίζεται το `finalGrade` και η διπλωματική ολοκληρώνεται.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID της διπλωματικής
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                criteria:
+                  type: object
+                  required:
+                    - originality
+                    - methodology
+                    - presentation
+                    - knowledge
+                  properties:
+                    originality:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+                    methodology:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+                    presentation:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+                    knowledge:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+              example:
+                criteria:
+                  originality: 8
+                  methodology: 7
+                  presentation: 9
+                  knowledge: 8
+      responses:
+        '200':
+          description: Ενημερωμένη διπλωματική με το νέο βαθμό
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Grade submitted successfully"
+                  thesis:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      title:
+                        type: string
+                      status:
+                        type: string
+                        enum: ["pending", "active", "under_review", "completed", "cancelled"]
+                      grades:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            professor:
+                              type: string
+                            criteria:
+                              type: object
+                              properties:
+                                originality:
+                                  type: number
+                                methodology:
+                                  type: number
+                                presentation:
+                                  type: number
+                                knowledge:
+                                  type: number
+                            total:
+                              type: number
+                      finalGrade:
+                        type: number
+        '400':
+          description: Input error or the teacher does not belong to the committee
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You are not part of this committee"
+
+  /theses/{id}/grades:
+    get:
+      summary: Get all grades for a thesis
+      description: >
+        Επιτρέπει σε μέλος της τριμελούς (επιβλέπων ή καθηγητής committee) να δει
+        όλους τους βαθμούς που έχουν καταχωρηθεί για τη συγκεκριμένη διπλωματική.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Το ID της διπλωματικής
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Grades retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thesisId:
+                    type: string
+                  grades:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        professor:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            name:
+                              type: string
+                            surname:
+                              type: string
+                            email:
+                              type: string
+                        criteria:
+                          type: object
+                          properties:
+                            originality:
+                              type: number
+                            methodology:
+                              type: number
+                            presentation:
+                              type: number
+                            knowledge:
+                              type: number
+                        total:
+                          type: number
+                          format: float
+                  finalGrade:
+                    type: number
+                    format: float
+                    description: Ο τελικός βαθμός (αν έχουν βαθμολογήσει και οι 3)
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Unauthorized – Δεν υπάρχει ή δεν είναι έγκυρο το token
+        "403":
+          description: Forbidden – Ο καθηγητής δεν ανήκει στην τριμελή
+        "404":
+          description: Thesis not found
 
   /theses/{id}/activate:
     patch:
@@ -1567,8 +1790,57 @@ components:
         email:
           type: string
 
+    Grade:
+      type: object
+      required:
+        - professor
+        - criteria
+        - total
+      properties:
+        professor:
+          type: string
+          description: ID του καθηγητή
+        criteria:
+          type: object
+          required:
+            - originality
+            - methodology
+            - presentation
+            - knowledge
+          properties:
+            originality:
+              type: number
+              minimum: 0
+              maximum: 10
+            methodology:
+              type: number
+              minimum: 0
+              maximum: 10
+            presentation:
+              type: number
+              minimum: 0
+              maximum: 10
+            knowledge:
+              type: number
+              minimum: 0
+              maximum: 10
+
+    CommitteeMember:
+      type: object
+      properties:
+        professor:
+          type: string
+          description: ID του καθηγητή μέλους της τριμελούς
+        status:
+          type: string
+          enum: ["pending", "accepted", "rejected"]
+          default: "pending"
+
     Theses:
       type: object
+      required:
+        - title
+        - professor
       properties:
         _id:
           type: string
@@ -1578,42 +1850,90 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, active, under_review, completed, cancelled]
+          enum: ["pending", "active", "under_review", "completed", "cancelled"]
+          default: "pending"
         assignedDate:
           type: string
           format: date-time
         professor:
           type: string
+          description: ID του επιβλέποντα καθηγητή
+        gradingOpen:
+          type: boolean
+          default: false
         student:
           type: string
+          nullable: true
         ap_number:
-          type: string
-          description: Αριθμός Γενικής Συνέλευσης
-          example: "15"
+          type: number
         ap_year:
-          type: string
-          description: Έτος Γενικής Συνέλευσης
-          example: "2024"
+          type: number
         cancel_reason:
           type: string
-          description: Λόγος ακύρωσης ανάθεσης
-          example: "Κατόπιν αίτησης φοιτητή"
-        grade:
-          type: number
-          format: float
-          description: Βαθμός διπλωματικής
-          example: 8.5
+        grades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grade'
         nimertis_link:
           type: string
-          format: uri
-          description: Σύνδεσμος προς το αποθετήριο Νημερτής
-          example: "https://nemertes.lis.upatras.gr/jspui/handle/10889/12345"
-        createdAt:
+        committee:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommitteeMember'
+        attachment:
+          type: string
+        draftFile:
+          type: string
+        finalGrade:
+          type: number
+          description: Τελικός μέσος όρος βαθμού από όλα τα μέλη της τριμελούς και τον επιβλέποντα
+        extraLinks:
+          type: array
+          items:
+            type: string
+        examDate:
           type: string
           format: date-time
-        updatedAt:
+        examMode:
           type: string
-          format: date-time
+          enum: ["in_person", "online"]
+        examLocation:
+          type: string
+      example:
+        _id: "64f8b1a0c1234abc56789012"
+        title: "Σχεδίαση και Ανάπτυξη Web App"
+        description: "Διπλωματική εργασία για το ΤΜΗΥΠ"
+        status: "under_review"
+        assignedDate: "2025-08-26T12:00:00Z"
+        professor: "64f8a0b1c1234abc56789001"
+        gradingOpen: true
+        student: "64f8c1d2c1234abc56789009"
+        ap_number: 123
+        ap_year: 2025
+        cancel_reason: null
+        grades:
+          - professor: "64f8a0b1c1234abc56789001"
+            criteria:
+              originality: 8
+              methodology: 7
+              presentation: 9
+              knowledge: 8
+            total: 8
+        nimertis_link: "https://example.com/nimertis"
+        committee:
+          - professor: "64f8a0b1c1234abc56789002"
+            status: "accepted"
+          - professor: "64f8a0b1c1234abc56789003"
+            status: "accepted"
+        attachment: "https://example.com/attachment.pdf"
+        draftFile: "https://example.com/draft.pdf"
+        finalGrade: 8.33
+        extraLinks:
+          - "https://example.com/resource1"
+          - "https://example.com/resource2"
+        examDate: "2025-09-10T10:00:00Z"
+        examMode: "online"
+        examLocation: "Zoom"
 
     CreateThesesRequest:
       type: object

@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const gradeSchema = new mongoose.Schema({
+  professor: { type: mongoose.Schema.Types.ObjectId, ref: 'Professor', required: true },
+  criteria: {
+    originality: { type: Number, required: true },
+    methodology: { type: Number, required: true },
+    presentation: { type: Number, required: true },
+    knowledge: { type: Number, required: true }
+  },
+  total: { type: Number, required: true }
+}, { timestamps: true });
+
 const thesesSchema = new mongoose.Schema(
   {
     title: {
@@ -25,6 +36,10 @@ const thesesSchema = new mongoose.Schema(
       ref: "Professor",
       required: true
     },
+    gradingOpen: {
+      type: Boolean,
+      default: false
+    },
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
@@ -39,24 +54,21 @@ const thesesSchema = new mongoose.Schema(
     cancel_reason: {
       type: String 
     },
-    grade: {
-      type: Number,
-      min: 0,
-      max: 10 
-    },
+    grades: [gradeSchema],
     nimertis_link: {
       type: String 
     },
     committee: [{
       professor: { type: mongoose.Schema.Types.ObjectId, ref: "Professor" },
-      status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" }
+      status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
     }],
     attachment: {
-      type: String // URL document PDF
+      type: String 
     },
     draftFile: { 
-      type: String // URL / filename 
+      type: String 
     }, 
+    finalGrade: { type: Number },
     extraLinks: [String],
     examDate: { type: Date },
     examMode: { type: String, enum: ["in_person", "online"] },

@@ -99,7 +99,7 @@ const completeThesis = async (id, { grade, nymerti_link }) => {
 const getThesisByStudent = async (studentId) => {
   const thesis = await Theses.findOne({ student: studentId })
     .populate("professor", "name surname email")
-    .populate("student", "name surname email");
+    .populate("student", "name surname student_number email");
 
   if (!thesis) {
     throw new Error("No thesis found for this student");
@@ -214,6 +214,99 @@ const setExamDetails = async (studentId, { examDate, examMode, examLocation }) =
   return thesis;
 };
 
+//supervisor opens grading
+const openGrading = async (professorId, thesisId) => {
+  const thesis = await Theses.findById(thesisId);
+  if (!thesis) throw new Error("Thesis not found");
+
+  // μόνο ο επιβλέπων μπορεί να το κάνει
+  if (thesis.professor.toString() !== professorId.toString()) {
+    throw new Error("Only the supervisor can open grading");
+  }
+
+  if (thesis.gradingOpen) {
+    throw new Error("Grading is already open");
+  }
+
+  thesis.gradingOpen = true;
+  await thesis.save();
+
+  return thesis;
+};
+
+// Professor sets grade
+const setGrade = async (id, professorId, gradeData) => {
+  const thesis = await Theses.findById(id)
+    .populate("professor", "name surname email")
+    .populate("committee.professor", "name surname email")
+    .populate("student", "name surname student_number email");
+
+  if (!thesis) throw new Error("Thesis not found");
+  if (!thesis.gradingOpen) throw new Error("Grading is not open for this thesis");
+
+  // Supervisor or comittee prof
+  const isSupervisor = thesis.professor._id.toString() === professorId.toString();
+  const isCommittee = thesis.committee.some(
+    (inv) => inv.professor._id.toString() === professorId.toString()
+  );
+  if (!isSupervisor && !isCommittee) {
+    throw new Error("You are not part of this committee");
+  }
+
+  // check for existing grade
+  const alreadyGraded = thesis.grades.some(
+    (g) => g.professor.toString() === professorId.toString()
+  );
+  if (alreadyGraded) throw new Error("Professor has already graded this thesis");
+
+  // calc total = MO criteria
+  const { originality, methodology, presentation, knowledge } = gradeData.criteria;
+  const total =
+    (originality + methodology + presentation + knowledge) / 4;
+
+  // save grade
+  thesis.grades.push({
+    professor: professorId,
+    criteria: gradeData.criteria,
+    total: Number(total.toFixed(2)),
+  });
+
+  if (thesis.grades.length === 3) {
+    const totals = thesis.grades.map((g) => g.total);
+    const avg = totals.reduce((a, b) => a + b, 0) / totals.length;
+    thesis.finalGrade = Number(avg.toFixed(2));
+    thesis.status = "completed";
+  }
+
+  await thesis.save();
+  return thesis;
+};
+
+//get prof's grades
+const getGrades = async (professorId, thesisId) => {
+  const thesis = await Theses.findById(thesisId)
+    .populate("grades.professor", "name surname email")
+    .populate("professor", "name surname email")
+    .populate("committee.professor", "name surname email");
+
+  if (!thesis) throw new Error("Thesis not found");
+
+  const isSupervisor = thesis.professor._id.toString() === professorId.toString();
+  const isCommittee = thesis.committee.some(
+    (inv) => inv.professor && inv.professor._id.toString() === professorId.toString()
+  );
+  if (!isSupervisor && !isCommittee) {
+    throw new Error("You are not part of this committee");
+  }
+
+  return {
+    thesisId: thesis._id,
+    grades: thesis.grades,
+    finalGrade: thesis.finalGrade || null
+  };
+};
+
+
 export default {
   createTheses,
   getAllTheses,
@@ -228,5 +321,8 @@ export default {
   inviteProfessors,
   respondInvitation,
   uploadDraft,
-  setExamDetails
+  setExamDetails,
+  openGrading,
+  setGrade,
+  getGrades
 };

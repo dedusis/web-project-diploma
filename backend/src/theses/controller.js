@@ -176,6 +176,64 @@ const setExamDetailsController = async (req, res) => {
   }
 };
 
+// Professor sets grade
+const openGradingController = async (req, res) => {
+  try {
+    const professorId = req.user.id; 
+    const thesisId = req.params.id;
+
+    const updatedThesis = await thesesService.openGrading(professorId, thesisId);
+
+    res.json({
+      message: "Grading is now open for this thesis",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Professor sets grade
+const setGradeController = async (req, res) => {
+  try {
+    const professorId = req.user.id;
+    const thesisId = req.params.id;
+    const { criteria } = req.body; // μόνο τα criteria
+
+    if (
+      !criteria ||
+      typeof criteria.originality !== "number" ||
+      typeof criteria.methodology !== "number" ||
+      typeof criteria.presentation !== "number" ||
+      typeof criteria.knowledge !== "number"
+    ) {
+      return res.status(400).json({ error: "All criteria must be numbers" });
+    }
+
+    const updatedThesis = await thesesService.setGrade(thesisId, professorId, { criteria });
+
+    res.json({
+      message: "Grade submitted successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+//get prof's grades
+const getGradesController = async (req, res) => {
+  try {
+    const professorId = req.user.id;
+    const thesisId = req.params.id;
+
+    const grades = await thesesService.getGrades(professorId, thesisId);
+    res.json(grades);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -190,5 +248,8 @@ export default {
   inviteProfessorsController,
   respondInvitationController,
   uploadDraftController,
-  setExamDetailsController
+  setExamDetailsController,
+  openGradingController,
+  setGradeController,
+  getGradesController
 };
