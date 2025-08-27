@@ -262,6 +262,16 @@ const setNimertisLinkController = async (req, res) => {
   }
 };
 
+// View completed thesis info + exam record
+const getCompletedThesisController = async (req, res) => {
+  try {
+    const thesis = await thesesService.getCompletedThesis(req.params.id);
+    res.json(thesis);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -281,5 +291,6 @@ export default {
   setGradeController,
   getGradesController,
   getPraktikoController,
-  setNimertisLinkController
+  setNimertisLinkController,
+  getCompletedThesisController
 };

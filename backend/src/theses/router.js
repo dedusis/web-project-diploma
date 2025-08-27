@@ -147,4 +147,12 @@ router.patch(
   thesesController.setNimertisLinkController
 );
 
+// View completed thesis info + exam record
+router.get(
+  "/:id/completed",
+  authenticateToken,
+  authorizeRoles("student", "professor", "secretary"),
+  thesesController.getCompletedThesisController
+);
+
 export default router;

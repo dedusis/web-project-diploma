@@ -219,7 +219,7 @@ const openGrading = async (professorId, thesisId) => {
   const thesis = await Theses.findById(thesisId);
   if (!thesis) throw new Error("Thesis not found");
 
-  // μόνο ο επιβλέπων μπορεί να το κάνει
+  // Only supervisor have access
   if (thesis.professor.toString() !== professorId.toString()) {
     throw new Error("Only the supervisor can open grading");
   }
@@ -275,7 +275,6 @@ const setGrade = async (id, professorId, gradeData) => {
     const totals = thesis.grades.map((g) => g.total);
     const avg = totals.reduce((a, b) => a + b, 0) / totals.length;
     thesis.finalGrade = Number(avg.toFixed(2));
-    thesis.status = "completed";
   }
 
   await thesis.save();
@@ -367,11 +366,26 @@ const setNimertisLink = async (studentId, { nimertis_link }) => {
   }
 
   thesis.nimertis_link = nimertis_link;
+  thesis.status = "completed";
   await thesis.save();
 
   return thesis;
 };
 
+// View completed thesis info + exam record
+const getCompletedThesis = async (id) => {
+  const thesis = await Theses.findById(id)
+    .populate("professor", "name surname email")
+    .populate("student", "name surname email")
+    .populate("committee.professor", "name surname email");
+
+  if (!thesis) throw new Error("Thesis not found");
+  if (thesis.status !== "completed") {
+    throw new Error("Thesis is not completed yet");
+  }
+
+  return thesis; 
+};
 
 export default {
   createTheses,
@@ -392,5 +406,6 @@ export default {
   setGrade,
   getGrades,
   getPraktiko,
-  setNimertisLink
+  setNimertisLink,
+  getCompletedThesis
 };

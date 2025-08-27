@@ -1586,6 +1586,56 @@ paths:
         '403':
           description: Not authorized
 
+  /theses/{id}/completed:
+    get:
+      summary: View completed thesis info and exam record
+      description: Διαθέσιμο μόνο αν η διπλωματική είναι σε κατάσταση "completed". Επιστρέφει πληροφορίες, βαθμολογία και πρακτικό εξέτασης.
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Thesis ID
+      responses:
+        "200":
+          description: Completed thesis details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  student:
+                    $ref: "#/components/schemas/Student"
+                  professor:
+                    $ref: "#/components/schemas/Professor"
+                  committee:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Professor"
+                  finalGrade:
+                    type: number
+                  examDate:
+                    type: string
+                    format: date-time
+                  examLocation:
+                    type: string
+                  examMode:
+                    type: string
+                  examRecordHtml:
+                    type: string
+                    example: "<html><body><h1>Πρακτικό εξέτασης</h1></body></html>"
+        "400":
+          description: Bad Request
+
 components:
   securitySchemes:
     bearerAuth:
