@@ -306,6 +306,57 @@ const getGrades = async (professorId, thesisId) => {
   };
 };
 
+// Student gets praktiko (HTML)
+const getPraktiko = async (studentId) => {
+  const thesis = await Theses.findOne({ student: studentId })
+    .populate("professor", "name surname email")
+    .populate("committee.professor", "name surname email")
+    .populate("student", "name surname email student_number");
+
+  if (!thesis) throw new Error("No thesis found for this student");
+  if (thesis.status !== "completed") {
+    throw new Error("Praktiko is available only after thesis is completed");
+  }
+
+  let html = `
+    <html>
+      <head>
+        <title>Πρακτικό Εξέτασης - ${thesis.title}</title>
+      </head>
+      <body>
+        <h1>Πρακτικό Εξέτασης</h1>
+        <h2>Τίτλος: ${thesis.title}</h2>
+        <p><b>Φοιτητής:</b> ${thesis.student.name} ${thesis.student.surname} (${thesis.student.email})</p>
+        <p><b>Επιβλέπων:</b> ${thesis.professor.name} ${thesis.professor.surname} (${thesis.professor.email})</p>
+        <p><b>Ημερομηνία Εξέτασης:</b> ${thesis.examDate ? thesis.examDate.toLocaleString() : "-"}</p>
+
+        <h3>Βαθμολογίες</h3>
+        <ul>
+  `;
+
+  thesis.grades.forEach(g => {
+    html += `
+      <li>
+        <b>${g.professor.name} ${g.professor.surname}</b> 
+        (Σύνολο: ${g.total})<br>
+        - Originality: ${g.criteria.originality}<br>
+        - Methodology: ${g.criteria.methodology}<br>
+        - Presentation: ${g.criteria.presentation}<br>
+        - Knowledge: ${g.criteria.knowledge}
+      </li>
+    `;
+  });
+
+  html += `
+        </ul>
+        <h2>Τελικός Βαθμός: ${thesis.finalGrade}</h2>
+      </body>
+    </html>
+  `;
+
+  return html;
+};
+
 
 export default {
   createTheses,
@@ -324,5 +375,6 @@ export default {
   setExamDetails,
   openGrading,
   setGrade,
-  getGrades
+  getGrades,
+  getPraktiko
 };

@@ -234,6 +234,17 @@ const getGradesController = async (req, res) => {
   }
 };
 
+//students praktiko
+const getPraktikoController = async (req, res) => {
+  try {
+    const html = await thesesService.getPraktiko(req.user.id);
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -251,5 +262,6 @@ export default {
   setExamDetailsController,
   openGradingController,
   setGradeController,
-  getGradesController
+  getGradesController,
+  getPraktikoController
 };

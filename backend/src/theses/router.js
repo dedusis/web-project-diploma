@@ -131,4 +131,12 @@ router.get("/:id/grades",
   thesesController.getGradesController
 );
 
+//students praktiko (HTML)
+router.get(
+  "/me/praktiko",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.getPraktikoController
+);
+
 export default router;

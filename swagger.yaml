@@ -1153,6 +1153,53 @@ paths:
         "404":
           description: "Thesis not found"
 
+  /theses/me/praktiko:
+    get:
+      summary: "Student gets praktiko (HTML)"
+      description: >
+        Ο φοιτητής βλέπει το πρακτικό εξέτασης (HTML).  
+        Το πρακτικό είναι διαθέσιμο μόνο αν η διπλωματική έχει ολοκληρωθεί (`status = completed`).
+      tags:
+        - Theses 
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Επιστροφή πρακτικού σε μορφή HTML"
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <html>
+                    <head><title>Πρακτικό Εξέτασης</title></head>
+                    <body>
+                      <h1>Πρακτικό Εξέτασης</h1>
+                      <h2>Τίτλος: Web</h2>
+                      <p><b>Φοιτητής:</b> Γιάννης Παπαδόπουλος (gp@example.com)</p>
+                      <p><b>Επιβλέπων:</b> Νίκος Καθηγητής (nk@example.com)</p>
+                      <h3>Βαθμολογίες</h3>
+                      <ul>
+                        <li>Νίκος Καθηγητής (Σύνολο: 8.5)</li>
+                        <li>Μαρία Επιτροπή (Σύνολο: 9.0)</li>
+                        <li>Πέτρος Επιτροπή (Σύνολο: 8.0)</li>
+                      </ul>
+                      <h2>Τελικός Βαθμός: 8.5</h2>
+                    </body>
+                  </html>
+        '400':
+          description: "Σφάλμα - δεν βρέθηκε ή δεν έχει ολοκληρωθεί η διπλωματική"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Praktiko is available only after thesis is completed"
+        '401':
+          description: "Unauthorized - απαιτείται σύνδεση φοιτητή"
+
   /theses/{id}/open-grading:
     patch:
       summary: Supervisor opens grading for the thesis
