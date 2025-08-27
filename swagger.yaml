@@ -807,7 +807,7 @@ paths:
       security:
         - bearerAuth: []
       tags:
-        - Theses
+        - Theses (Student)
       requestBody:
         required: true
         content:
@@ -976,7 +976,7 @@ paths:
       summary: Get the logged-in student's thesis
       description: Returns the thesis details for the currently authenticated student.
       tags:
-        - Theses
+        - Theses (Student)
       security:
         - bearerAuth: []
       responses:
@@ -1047,7 +1047,7 @@ paths:
         και προαιρετικά συνδέσμους προς εξωτερικό υλικό (Google Drive, YouTube κλπ).
         Με την καταχώρηση, η διπλωματική περνάει σε status **under_review**.
       tags:
-        - Theses
+        - Theses (Student)
       security:
         - bearerAuth: []
       requestBody:
@@ -1114,7 +1114,7 @@ paths:
         Ο φοιτητής καταχωρεί ημερομηνία, τρόπο και χώρο εξέτασης. 
         Επιτρέπεται μόνο όταν η διπλωματική είναι σε κατάσταση "under_review".
       tags:
-        - Theses
+        - Theses (Student)
       security:
         - bearerAuth: []
       requestBody:
@@ -1160,7 +1160,7 @@ paths:
         Ο φοιτητής βλέπει το πρακτικό εξέτασης (HTML).  
         Το πρακτικό είναι διαθέσιμο μόνο αν η διπλωματική έχει ολοκληρωθεί (`status = completed`).
       tags:
-        - Theses 
+        - Theses (Student)
       security:
         - bearerAuth: []
       responses:
@@ -1199,6 +1199,40 @@ paths:
                     example: "Praktiko is available only after thesis is completed"
         '401':
           description: "Unauthorized - απαιτείται σύνδεση φοιτητή"
+
+  /theses/me/nimertis:
+    patch:
+      summary: Student sets Nimertis link
+      description: Ο φοιτητής καταχωρεί το URL στο αποθετήριο της βιβλιοθήκης (Νημερτής), μόνο αφού η διπλωματική είναι completed.
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses (Student)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nimertis_link:
+                  type: string
+                  example: "https://nemertes.library.upatras.gr/jspui/handle/10889/12345"
+      responses:
+        "200":
+          description: Nimertis link added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Nimertis link set successfully"
+                  thesis:
+                    $ref: "#/components/schemas/Thesis"
+        "400":
+          description: Bad Request
 
   /theses/{id}/open-grading:
     patch:
@@ -1239,7 +1273,7 @@ paths:
 
   /theses/{id}/grade:
     patch:
-      summary: Set grada for thesis 
+      summary: Professor set grads for thesis 
       tags:
         - Theses
       description: >

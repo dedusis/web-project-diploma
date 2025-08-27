@@ -139,4 +139,12 @@ router.get(
   thesesController.getPraktikoController
 );
 
+// Student sets Nimertis link
+router.patch(
+  "/me/nimertis",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.setNimertisLinkController
+);
+
 export default router;

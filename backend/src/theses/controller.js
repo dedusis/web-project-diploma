@@ -245,6 +245,23 @@ const getPraktikoController = async (req, res) => {
   }
 };
 
+// Student sets Nimertis link
+const setNimertisLinkController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { nimertis_link } = req.body;
+
+    const updatedThesis = await thesesService.setNimertisLink(studentId, { nimertis_link });
+
+    res.json({
+      message: "Nimertis link set successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -263,5 +280,6 @@ export default {
   openGradingController,
   setGradeController,
   getGradesController,
-  getPraktikoController
+  getPraktikoController,
+  setNimertisLinkController
 };

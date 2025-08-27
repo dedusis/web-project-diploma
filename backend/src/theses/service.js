@@ -357,6 +357,21 @@ const getPraktiko = async (studentId) => {
   return html;
 };
 
+// Student adds Nimertis link
+const setNimertisLink = async (studentId, { nimertis_link }) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "completed") {
+    throw new Error("You can only set the Nimertis link after completion");
+  }
+
+  thesis.nimertis_link = nimertis_link;
+  await thesis.save();
+
+  return thesis;
+};
+
 
 export default {
   createTheses,
@@ -376,5 +391,6 @@ export default {
   openGrading,
   setGrade,
   getGrades,
-  getPraktiko
+  getPraktiko,
+  setNimertisLink
 };
