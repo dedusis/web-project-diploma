@@ -206,7 +206,7 @@ const respondInvitation = async (professorId, thesisId, response) => {
 
   invitation.status = response; // "accepted" or "rejected"
 
-  // if >= 2 accepted -> thesis.active
+  // if >= 2 accepted -> is ready for activation
   const acceptedCount = thesis.committee.filter(
     (inv) => inv.status === "accepted"
   ).length;
@@ -214,6 +214,11 @@ const respondInvitation = async (professorId, thesisId, response) => {
   if (acceptedCount >= 2) {
     thesis.readyForActivation = true; 
     thesis.assignedDate = new Date();
+    thesis.committee.forEach((inv) => {
+      if (inv.status === "pending") {
+        inv.status = "rejected";
+      }
+    });
   } else {
     thesis.readyForActivation = false; 
   }
