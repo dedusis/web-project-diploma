@@ -786,20 +786,32 @@ paths:
           description: Not authorized
 
     get:
-      summary: Προβολή όλων των ΔΕ σε κατάσταση "active" ή "under_review"
+      summary: Gets all theses that status is "active" or "under_review"
       tags:
-        - Theses
+        - Secretary
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, under_review]
+          required: false
+          description: filter for getting theses "active" or "under_review". 
       responses:
         "200":
-          description: Λίστα διπλωματικών
+          description: Theses List
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Theses"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (only secretary has access)
 
   /theses/me/invite:
     patch:
@@ -814,15 +826,71 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - emails
               properties:
                 emails:
                   type: array
                   items:
                     type: string
+                    format: email
                     example: "professor1@uni.gr"
       responses:
-        '200':
-          description: Invitations sent
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: "64f23b7c12a9b21e0c9a1234"
+                  title:
+                    type: string
+                    example: "Σύστημα Διαχείρισης Διπλωματικών"
+                  committee:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        professor:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "64f23b7c12a9b21e0c9a5678"
+                            name:
+                              type: string
+                              example: "Γιάννης"
+                            surname:
+                              type: string
+                              example: "Παπαδόπουλος"
+                            email:
+                              type: string
+                              example: "professor1@uni.gr"
+                        status:
+                          type: string
+                          enum: [pending, accepted, rejected]
+                          example: "pending"
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No professors found with these emails"
+        "403":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Professor professor1@uni.gr is the supervisor and cannot be invited to the committee"
+
 
   /theses/{id}/respond:
     patch:

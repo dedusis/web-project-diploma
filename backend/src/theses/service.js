@@ -151,6 +151,11 @@ const inviteProfessors = async (studentId, professorEmails) => {
   }
 
   professors.forEach((prof) => {
+
+    if (prof._id.toString() === thesis.professor.toString()) {
+      throw new Error(`Professor ${prof.email} is the supervisor and cannot be invited to the committee`);
+    }
+
     const existingInvitation = thesis.committee.find(
       (inv) => inv.professor.toString() === prof._id.toString()
     );
