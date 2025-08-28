@@ -132,7 +132,18 @@ router.patch(
   authorizeRoles('professor','secretary'),
   thesesController.unassignThesisFromStudent
 );
-  
 
+router.post(
+  '/:id/notes',
+  authenticateToken,
+  authorizeRoles('professor'),
+  thesesController.addNotesController
+);
 
+router.get(
+  '/:id/notes',
+  authenticateToken,
+  authorizeRoles('professor'),
+  thesesController.viewMyNotes
+);
 export default router;

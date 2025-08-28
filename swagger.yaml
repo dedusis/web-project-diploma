@@ -1097,6 +1097,107 @@ paths:
           description: Thesis not found or not assigned to any student
         "500":
           description: Internal server error
+  /theses/{id}/notes:
+    get:
+      summary: View professor's notes for a thesis
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      description: >
+        Allows a professor (either supervisor or committee member with accepted status) 
+        to view **only their own notes** related to a specific thesis.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the thesis
+      responses:
+        "200":
+          description: Notes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    text:
+                      type: string
+                      example: "The student needs to improve methodology"
+                    date:
+                      type: string
+                      format: date-time
+                      example: "2025-08-29T10:45:00.000Z"
+                    professor:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "68b0355814de03a3841a690e"
+                        name:
+                          type: string
+                          example: "Kostas"
+                        surname:
+                          type: string
+                          example: "Papadopoulos"
+                        email:
+                          type: string
+                          example: "kostas@gmail.com"
+        "403":
+          description: Unauthorized to view notes of this thesis
+        "404":
+          description: Thesis not found
+
+    post:
+      summary: Add a note to a thesis
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The thesis ID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  maxLength: 300
+                  example: "Ο φοιτητής καθυστέρησε την παράδοση."
+      responses:
+        "201":
+          description: Note added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  text:
+                    type: string
+                  professor:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "400":
+          description: Invalid input
+        "404":
+          description: Thesis not found
+        "500":
+          description: Server error
 
   /theses/{id}/committee:
     get:

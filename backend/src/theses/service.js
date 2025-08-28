@@ -98,6 +98,7 @@ const completeThesis = async (id, { grade, nymerti_link }) => {
 //function for get my thesis
 const getThesisByStudent = async (studentId) => {
   const thesis = await Theses.findOne({ student: studentId })
+    select("-notes")
     .populate("professor", "name surname email")
     .populate("student", "name surname email");
 
@@ -197,6 +198,8 @@ const showProfessorTheses = async (professorId,filters={}) => {
         { "committee.professor": professorId }
         ]
     })
+    .select("-notes -statusHistory -__v") 
+    .populate("student", "name surname student_number email")
     if (!theses || theses.length === 0) {
         throw new Error('No theses assigned to this professor');
     }
@@ -211,12 +214,12 @@ const showProfessorTheses = async (professorId,filters={}) => {
         query.role = filters.role;
     }
     return theses;
-}
+};
 
 const showthesesdetails = async (thesesId,professorId = null) => {
   const theses = await Theses.findById(thesesId)
       .populate('student', 'name surname student_number email')
-      // .populate('committee', 'name surname email'); // θα το συμπληρώσεις όταν φτιάξεις το committee
+      .populate('committee', 'name surname email')
       .lean()
       .exec();
 
@@ -248,8 +251,8 @@ const showthesesdetails = async (thesesId,professorId = null) => {
               student_number: theses.student.student_number,
               email: theses.student.email,
             }
-          : null, // αν δεν υπάρχει φοιτητής, θα επιστρέφει null
-      committee: theses.committee || [], // άδειος πίνακας αν δεν υπάρχει committee
+          : null, 
+      committee: theses.committee || [], 
   };
 };
 const showProfessorInvitations = async (professorId) => {
@@ -318,6 +321,15 @@ const unassignThesisFromStudent = async (thesesId) => {
   if (!studentId) {
     throw new Error("This thesis is not assigned to any student");
   }
+  const isAuthorized =
+  theses.professor?._id.toString() === professorId ||
+  (theses.committee?.some(c => c.professor._id.toString() === professorId && c.status === "accepted"));
+
+  if (!isAuthorized) {
+    const err = new Error("Unauthorized to unassign from this theses");
+    err.status = 403;
+    throw err;
+  }
 
   theses.student=null;
   theses.status="pending";
@@ -325,7 +337,65 @@ const unassignThesisFromStudent = async (thesesId) => {
   return theses;
 };
 
+const addNotes = async (thesesId,professorId,text ) => {
+  const theses = await Theses.findById(thesesId);
+  if (!theses) {
+    throw new Error("Thesis not found");
+  }
+  const isAuthorized =
+    theses.professor?.toString() === professorId ||
+    theses.committee?.some((c) => {
+      const committeeProfId = c.professor._id
+        ? c.professor._id.toString() 
+        : c.professor.toString();    
+      return committeeProfId === professorId && c.status === "accepted";
+    });
 
+  if (!isAuthorized) {
+    const err = new Error("Unauthorized to add notes to this thesis");
+    err.status = 403;
+    throw err;
+  }
+
+  const newNote = {
+    text,
+    professor: professorId,
+  };
+
+  theses.notes.push(newNote);
+  await theses.save();
+};
+
+const viewMyNotes = async (thesesId,professorId) => {
+  const theses = await Theses.findById(thesesId).populate('notes.professor', 'name surname email');
+  if (!theses) {
+    throw new Error("Thesis not found");
+  }
+  const isAuthorized =
+    theses.professor?.toString() === professorId ||
+    theses.committee?.some((c) => {
+      const committeeProfId = c.professor._id
+        ? c.professor._id.toString() 
+        : c.professor.toString();    
+      return committeeProfId === professorId && c.status === "accepted";
+    });
+
+  if (!isAuthorized) {
+    const err = new Error("Unauthorized to view notes of this thesis");
+    err.status = 403;
+    throw err;
+  }
+
+  const mynotes = theses.notes.filter(note => note.professor._id.toString() === professorId);
+  if (mynotes.length === 0) {
+    throw new Error("No notes found for this professor on this thesis");
+  }
+
+  return mynotes.map(note => ({
+    text: note.text,
+    date: note.createdAt
+  }));
+};
 export default {
   createTheses,
   getAllTheses,
@@ -343,6 +413,8 @@ export default {
   respondInvitation,
   showthesesdetails,
   getInvitedProfessors,
-  unassignThesisFromStudent
+  unassignThesisFromStudent,
+  addNotes,
+  viewMyNotes
 };
    

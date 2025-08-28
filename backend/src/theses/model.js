@@ -1,5 +1,23 @@
 import mongoose from "mongoose";
 
+const noteschema = new mongoose.Schema({
+  text: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 300
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  professor : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Professor",
+    required: true
+  }
+});
+
 const thesesSchema = new mongoose.Schema(
   {
     title: {
@@ -30,6 +48,8 @@ const thesesSchema = new mongoose.Schema(
       ref: "Student",
       default: null
     },
+
+    notes:[noteschema],
 
     statusHistory:[{
       status: String,
@@ -66,6 +86,8 @@ const thesesSchema = new mongoose.Schema(
   {
     timestamps: true
   }
+
 );
+
 
 export default mongoose.model("Theses", thesesSchema);

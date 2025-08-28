@@ -199,6 +199,31 @@ const unassignThesisFromStudent = async (req, res) => {
   }
 };
 
+const addNotesController = async (req, res) => {
+  try {
+    const thesesId = req.params.id;
+    const professorId = req.user.id;
+    const { text } = req.body;
+    if(!text || text.trim() === 0) {
+      return res.status(400).json({ error: "Note text is required" });
+    }
+    const note = await thesesService.addNotes(thesesId, professorId, text);
+    res.json({ message: 'Note added successfully', note });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+};
+
+const viewMyNotes = async (req, res) => {
+  try {
+    const thesesId = req.params.id;
+    const professorId = req.user.id;
+    const notes = await thesesService.viewMyNotes(thesesId, professorId);
+    res.json(notes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 export default {
   createThesesController,
   getAllThesesController,
@@ -216,5 +241,7 @@ export default {
   showProfessorInvitationsController,
   showThesesDetailsController,
   getInvitedProfessorsController,
-  unassignThesisFromStudent
+  unassignThesisFromStudent,
+  addNotesController,
+  viewMyNotes
 };
