@@ -162,7 +162,17 @@ const respondInvitation = async (professorId, thesisId, response) => {
     throw new Error("This invitation has been rejected and cannot be changed");
   }
 
-  invitation.status = response; // "accepted" or "rejected"
+  if(response ==="accepted"){
+    invitation.status = "accepted";
+    invitation.acceptedAt = new Date();
+    invitation.rejectedAt = null; 
+  } else if (response === "rejected") {
+    invitation.status = "rejected";
+    invitation.rejectedAt = new Date();
+    invitation.acceptedAt = null;}
+    else {
+      throw new Error("Invalid response. Must be 'accepted' or 'rejected'");
+  }
 
   // if >= 2 accepted -> thesis.active
   const acceptedCount = thesis.committee.filter(
@@ -261,7 +271,42 @@ const showProfessorInvitations = async (professorId) => {
   );
 };
 
+const getInvitedProfessors = async (thesisId,professorId ) => {
+  const theses = await Theses.findById(thesisId)
+    .populate("committee.professor", "name surname email")
+    .lean()
+    .exec();
+  if (!theses) {
+    throw new Error("Thesis not found");
+  }
+  const isAuthorized =
+    theses.professor?._id.toString() === professorId ||
+    (theses.committee?.some(c => c.professor._id.toString() === professorId));
 
+  if (!isAuthorized) {
+    const err = new Error("Unauthorized to view this theses details");
+    err.status = 403;
+    throw err;
+  }
+
+  return {
+    thesesId: theses._id,
+    title: theses.title,
+    committee: theses.committee?.map(c => ({
+      professor: {
+        id: c.professor._id,
+        name: c.professor.name,
+        surname: c.professor.surname,
+        email: c.professor.email,
+        username: c.professor.username
+      },
+      invitedAt: c.invitedAt,
+      acceptedAt: c.acceptedAt,
+      rejectedAt: c.rejectedAt,
+      status: c.status   
+    })) || []
+  };
+};
 export default {
   createTheses,
   getAllTheses,
@@ -277,6 +322,7 @@ export default {
   showProfessorTheses,
   inviteProfessors,
   respondInvitation,
-  showthesesdetails
+  showthesesdetails,
+  getInvitedProfessors
 };
    

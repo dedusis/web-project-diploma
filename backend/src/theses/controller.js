@@ -174,6 +174,18 @@ const showProfessorInvitationsController = async (req,res) => {
     res.status(500).json({error:err.message});
   }
 };
+
+const getInvitedProfessorsController = async (req, res) => {
+  try {
+    const thesesId = req.params.id;
+    const professorId=req.user.id;
+    const details = await thesesService.getInvitedProfessors(thesesId,professorId);
+    res.json(details);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -189,5 +201,6 @@ export default {
   inviteProfessorsController,
   respondInvitationController,
   showProfessorInvitationsController,
-  showThesesDetailsController
+  showThesesDetailsController,
+  getInvitedProfessorsController
 };

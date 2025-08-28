@@ -119,7 +119,13 @@ router.get('/professor/:username/:id',
    authorizeRoles('professor','secretary'), 
    thesesController.showThesesDetailsController);
 
-
+router.get(
+    '/:id/committee',
+    authenticateToken,
+    authorizeRoles('professor','secretary'),
+    thesesController.getInvitedProfessorsController
+  );
+  
 
 
 export default router;

@@ -1066,6 +1066,84 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 
+  /theses/{id}/committee:
+    get:
+      summary: Get committee details of a thesis
+      description: >
+        Returns the list of professors invited to participate in the committee
+        of a specific thesis, along with their invitation status and timestamps.
+        Only the supervising professor, invited professors, or the secretary can
+        view this information.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The unique ID of the thesis"
+      responses:
+        "200":
+          description: Committee details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thesisId:
+                    type: string
+                    example: "66f2a0d9..."
+                  title:
+                    type: string
+                    example: "AI for Healthcare"
+                  committee:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        professor:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "66f29e..."
+                            name:
+                              type: string
+                              example: "Nikos"
+                            surname:
+                              type: string
+                              example: "Papadopoulos"
+                            email:
+                              type: string
+                              example: "nikos@uni.gr"
+                            username:
+                              type: string
+                              example: "npapado"
+                        invitedAt:
+                          type: string
+                          format: date-time
+                          example: "2025-08-20T10:20:00Z"
+                        acceptedAt:
+                          type: string
+                          format: date-time
+                          nullable: true
+                          example: null
+                        rejectedAt:
+                          type: string
+                          format: date-time
+                          nullable: true
+                          example: null
+                        status:
+                          type: string
+                          enum: [pending, accepted, rejected]
+                          example: "pending"
+        "403":
+          description: User is not authorized to view this thesis committee
+        "404":
+          description: Thesis not found
 
   /theses/professor/me:
     get:
