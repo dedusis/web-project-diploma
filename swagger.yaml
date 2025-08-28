@@ -577,9 +577,6 @@ paths:
   /student/me:
     patch:
       summary: Update logged-in student's profile
-      description: >
-        Επιτρέπει στον φοιτητή να ενημερώσει τα στοιχεία του λογαριασμού του.  
-        Μόνο συγκεκριμένα πεδία μπορούν να τροποποιηθούν: street, number, city, postcode, email, landline_telephone, mobile_telephone, password.
       tags:
         - Student
       security:
@@ -786,7 +783,7 @@ paths:
           description: Not authorized
 
     get:
-      summary: Λίστα διπλωματικών (active, under_review, ή readyForActivation)
+      summary: Theses list (active, under_review, or readyForActivation)
       tags:
         - Theses
       security:
@@ -799,14 +796,12 @@ paths:
             enum: [active, under_review, readyForActivation]
           required: false
           description: |
-            Φίλτρο κατάστασης:
-              - active → μόνο ενεργές
-              - under_review → μόνο υπό αξιολόγηση
-              - readyForActivation → μόνο έτοιμες για ενεργοποίηση
-            Αν δεν δοθεί, επιστρέφονται όλες οι active, under_review και readyForActivation.
+            Filter:
+              - active 
+              - under_review 
+              - readyForActivation 
       responses:
         "200":
-          description: Επιτυχής ανάκτηση διπλωματικών
           content:
             application/json:
               schema:
@@ -1321,7 +1316,7 @@ paths:
     patch:
       summary: Supervisor opens grading for the thesis
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
@@ -1358,7 +1353,7 @@ paths:
     patch:
       summary: Professor set grads for thesis 
       tags:
-        - Theses
+        - Theses (Professor)
       description: >
         Ο επιβλέπων καθηγητής ή μέλος της τριμελούς καταχωρεί βαθμό για τη διπλωματική.
         Το `total` υπολογίζεται αυτόματα από τα κριτήρια. Όταν όλοι οι 3 καθηγητές βαθμολογήσουν,
@@ -1470,7 +1465,7 @@ paths:
         Επιτρέπει σε μέλος της τριμελούς (επιβλέπων ή καθηγητής committee) να δει
         όλους τους βαθμούς που έχουν καταχωρηθεί για τη συγκεκριμένη διπλωματική.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
