@@ -23,7 +23,7 @@ const getThesesByIdController = async (req, res) => {
 const getActiveAndUnderReviewController = async (req, res) => {
   try {
     const { status } = req.query; 
-    const theses = await thesesService.getActiveAndUnderReviewTheses();
+    const theses = await thesesService.getActiveAndUnderReviewTheses(status);
     res.json(theses);
   } catch (err) {
     res.status(400).json({ error: err.message });

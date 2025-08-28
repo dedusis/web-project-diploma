@@ -62,6 +62,10 @@ const thesesSchema = new mongoose.Schema(
       professor: { type: mongoose.Schema.Types.ObjectId, ref: "Professor" },
       status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
     }],
+    readyForActivation: {
+      type: Boolean,
+      default: false,
+    },
     attachment: {
       type: String 
     },

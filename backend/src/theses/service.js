@@ -22,11 +22,21 @@ const getThesesById = async (id) => {
 
 // Secretary: get theses with status = active or under_review (optional filter by status)
 const getActiveAndUnderReviewTheses = async (status) => {
-  let query = { status: { $in: ["active", "under_review"] } };
+  let query = { 
+    $or: [
+      { status: { $in: ["active", "under_review"] } },
+      { readyForActivation: true }
+    ]
+  };
 
-  if (status && ["active", "under_review"].includes(status)) {
-    query = { status };
+  if (status && ["active", "under_review", "readyForActivation"].includes(status)) {
+    if (status === "readyForActivation") {
+      query = { readyForActivation: true };
+    } else {
+      query = { status };
+    }
   }
+
 
   const theses = await Theses.find(query)
     .populate("professor", "name surname email")
@@ -77,15 +87,20 @@ const assignThesesToStudent = async (thesesId, studentId) => {
 
 //secr actions
 const activateThesis = async (id, { ap_number, ap_year }) => {
-  return await Theses.findByIdAndUpdate(
-    id,
-    {
-      status: "active",
-      ap_number,
-      ap_year,
-    },
-    { new: true }
-  );
+  const thesis = await Theses.findById(id);
+  if (!thesis) throw new Error("Thesis not found");
+
+  if (!thesis.readyForActivation) {
+    throw new Error("Thesis is not ready for activation. Committee not complete.");
+  }
+
+  thesis.status = "active";
+  thesis.ap_number = ap_number;
+  thesis.ap_year = ap_year;
+  thesis.readyForActivation = false; // reset
+
+  await thesis.save();
+  return thesis;
 };
 
 const cancelThesis = async (id, { ap_number, ap_year, reason }) => {
@@ -197,10 +212,10 @@ const respondInvitation = async (professorId, thesisId, response) => {
   ).length;
 
   if (acceptedCount >= 2) {
-    thesis.status = "active";
+    thesis.readyForActivation = true; 
     thesis.assignedDate = new Date();
   } else {
-    thesis.status = "pending"; 
+    thesis.readyForActivation = false; 
   }
 
 

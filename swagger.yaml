@@ -786,9 +786,9 @@ paths:
           description: Not authorized
 
     get:
-      summary: Gets all theses that status is "active" or "under_review"
+      summary: Λίστα διπλωματικών (active, under_review, ή readyForActivation)
       tags:
-        - Secretary
+        - Theses
       security:
         - bearerAuth: []
       parameters:
@@ -796,22 +796,25 @@ paths:
           name: status
           schema:
             type: string
-            enum: [active, under_review]
+            enum: [active, under_review, readyForActivation]
           required: false
-          description: filter for getting theses "active" or "under_review". 
+          description: |
+            Φίλτρο κατάστασης:
+              - active → μόνο ενεργές
+              - under_review → μόνο υπό αξιολόγηση
+              - readyForActivation → μόνο έτοιμες για ενεργοποίηση
+            Αν δεν δοθεί, επιστρέφονται όλες οι active, under_review και readyForActivation.
       responses:
         "200":
-          description: Theses List
+          description: Επιτυχής ανάκτηση διπλωματικών
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Theses"
-        "401":
-          description: Unauthorized
         "403":
-          description: Forbidden (only secretary has access)
+          description: Not authorized
 
   /theses/me/invite:
     patch:
@@ -895,17 +898,17 @@ paths:
   /theses/{id}/respond:
     patch:
       summary: Professor responds to committee invitation
+      tags:
+        - Theses (Professor)
       security:
         - bearerAuth: []
-      tags:
-        - Theses
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
-          description: Thesis ID
+          description: The ID of the thesis
       requestBody:
         required: true
         content:
@@ -919,7 +922,19 @@ paths:
                   example: accepted
       responses:
         '200':
-          description: Invitation response recorded
+          description: Invitation response recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '400':
+          description: Invalid request or professor not invited
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden – only invited professors can respond
+        '404':
+          description: Thesis not found
 
   /theses/{id}:
     get:
@@ -1298,7 +1313,7 @@ paths:
                     type: string
                     example: "Nimertis link set successfully"
                   thesis:
-                    $ref: "#/components/schemas/Thesis"
+                    $ref: "#/components/schemas/Theses"
         "400":
           description: Bad Request
 
@@ -1528,7 +1543,6 @@ paths:
   /theses/{id}/activate:
     patch:
       summary: activate thesis assignment (by Secretary)
-      description: Η Γραμματεία εγκρίνει την ανάθεση διπλωματικής, καταχωρώντας τον αριθμό και το έτος της ΓΣ.
       tags:
         - Theses
       security:
@@ -1631,7 +1645,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Thesis"
+                $ref: "#/components/schemas/Theses"
         '403':
           description: Not authorized
 
