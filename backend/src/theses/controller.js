@@ -186,6 +186,19 @@ const getInvitedProfessorsController = async (req, res) => {
   }
 };
 
+const unassignThesisFromStudent = async (req, res) => {
+  try {
+    const thesesId = req.params.id;
+    const updatedThesis = await thesesService.unassignThesisFromStudent(thesesId);
+    if (!updatedThesis) {
+      return res.status(404).json({ error: 'Theses not found or not assigned to any student' });
+    }
+    res.json({ message: 'Theses unassigned from student successfully'});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export default {
   createThesesController,
   getAllThesesController,
@@ -202,5 +215,6 @@ export default {
   respondInvitationController,
   showProfessorInvitationsController,
   showThesesDetailsController,
-  getInvitedProfessorsController
+  getInvitedProfessorsController,
+  unassignThesisFromStudent
 };

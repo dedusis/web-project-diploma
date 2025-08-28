@@ -114,6 +114,7 @@ router.patch(
   authorizeRoles("professor"),
   thesesController.respondInvitationController
 );
+
 router.get('/professor/:username/:id',
    authenticateToken, 
    authorizeRoles('professor','secretary'), 
@@ -123,8 +124,14 @@ router.get(
     '/:id/committee',
     authenticateToken,
     authorizeRoles('professor','secretary'),
-    thesesController.getInvitedProfessorsController
-  );
+    thesesController.getInvitedProfessorsController);
+
+router.patch(
+  '/:id/unassign',
+  authenticateToken,
+  authorizeRoles('professor','secretary'),
+  thesesController.unassignThesisFromStudent
+);
   
 
 

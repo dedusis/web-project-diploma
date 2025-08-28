@@ -307,6 +307,25 @@ const getInvitedProfessors = async (thesisId,professorId ) => {
     })) || []
   };
 };
+
+const unassignThesisFromStudent = async (thesesId) => {
+  const theses = await Theses.findById(thesesId);
+  if (!theses) {
+    throw new Error("Thesis not found");
+  }
+
+  const studentId = theses.student;
+  if (!studentId) {
+    throw new Error("This thesis is not assigned to any student");
+  }
+
+  theses.student=null;
+  theses.status="pending";
+  await theses.save();
+  return theses;
+};
+
+
 export default {
   createTheses,
   getAllTheses,
@@ -323,6 +342,7 @@ export default {
   inviteProfessors,
   respondInvitation,
   showthesesdetails,
-  getInvitedProfessors
+  getInvitedProfessors,
+  unassignThesisFromStudent
 };
    

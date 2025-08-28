@@ -1065,6 +1065,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /theses/{id}/unassign:
+    patch:
+      summary: Unassign thesis from student
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      description: Unassigns the thesis from the currently assigned student. Only professors or secretaries can perform this action.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the thesis
+      responses:
+        "200":
+          description: Thesis unassigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Theses unassigned from student successfully
+                  thesis:
+                    $ref: '#/components/schemas/ThesisDetails'
+        "404":
+          description: Thesis not found or not assigned to any student
+        "500":
+          description: Internal server error
 
   /theses/{id}/committee:
     get:
