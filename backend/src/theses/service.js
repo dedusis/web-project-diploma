@@ -8,10 +8,6 @@ const createTheses = async (data) => {
   return await theses.save();
 };
 
-const getAllTheses = async () => {
-  return await Theses.find();
-};
-
 const getThesesById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid thesis ID");
@@ -22,6 +18,28 @@ const getThesesById = async (id) => {
     throw new Error("Thesis not found");
   }
   return thesis;
+};
+
+// Secretary: get theses with status = active or under_review (optional filter by status)
+const getActiveAndUnderReviewTheses = async (status) => {
+  let query = { status: { $in: ["active", "under_review"] } };
+
+  if (status && ["active", "under_review"].includes(status)) {
+    query = { status };
+  }
+
+  const theses = await Theses.find(query)
+    .populate("professor", "name surname email")
+    .populate("student", "name surname email student_number")
+    .populate("committee.professor", "name surname email");
+
+  return theses.map(t => {
+    const daysSinceAssignment = t.assignedDate
+      ? Math.floor((Date.now() - t.assignedDate) / (1000 * 60 * 60 * 24))
+      : null;
+
+    return { ...t.toObject(), daysSinceAssignment };
+  });
 };
 
 const updateTheses = async (id, updates) => {
@@ -83,16 +101,20 @@ const cancelThesis = async (id, { ap_number, ap_year, reason }) => {
   );
 };
 
-const completeThesis = async (id, { grade, nymerti_link }) => {
-  return await Theses.findByIdAndUpdate(
-    id,
-    {
-      status: "completed",
-      grade,
-      nymerti_link,
-    },
-    { new: true }
-  );
+const completeThesis = async (id) => {
+  const thesis = await Theses.findById(id);
+  if (!thesis) throw new Error("Thesis not found");
+
+  if (!thesis.finalGrade) {
+    throw new Error("Final grade is missing");
+  }
+  if (!thesis.nimertis_link) {
+    throw new Error("Nimertis link is missing");
+  }
+
+  thesis.status = "completed";
+  await thesis.save();
+  return thesis;
 };
 
 //function for get my thesis
@@ -366,7 +388,7 @@ const setNimertisLink = async (studentId, { nimertis_link }) => {
   }
 
   thesis.nimertis_link = nimertis_link;
-  thesis.status = "completed";
+  //thesis.status = "completed"; (gets completed automatically)
   await thesis.save();
 
   return thesis;
@@ -389,8 +411,8 @@ const getCompletedThesis = async (id) => {
 
 export default {
   createTheses,
-  getAllTheses,
   getThesesById,
+  getActiveAndUnderReviewTheses,
   updateTheses,
   assignThesesToStudent,
   deleteTheses,

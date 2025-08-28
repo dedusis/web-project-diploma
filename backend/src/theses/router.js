@@ -12,11 +12,12 @@ router.post(
   thesesController.createThesesController
 );
 
-// Get all theses (logged in users)
+//get theses status = active or status = under_review
 router.get(
-  '/',
+  "/",
   authenticateToken,
-  thesesController.getAllThesesController
+  authorizeRoles("secretary"),
+  thesesController.getActiveAndUnderReviewController
 );
 
 //get mythesis
