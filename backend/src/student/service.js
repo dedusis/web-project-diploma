@@ -50,6 +50,37 @@ const deleteStudentByUsername = async (username) => {
   return await Student.findOneAndDelete({ username });
 };
 
+//update my profile
+const updateOwnProfile = async (id, updates) => {
+  // Επιτρέπουμε μόνο συγκεκριμένα πεδία
+  const allowedUpdates = [
+    'street',
+    'number',
+    'city',
+    'postcode',
+    'email',
+    'landline_telephone',
+    'mobile_telephone',
+    'password'
+  ];
+
+  const filteredUpdates = {};
+  for (const key of allowedUpdates) {
+    if (updates[key] !== undefined) {
+      filteredUpdates[key] = updates[key];
+    }
+  }
+
+  if (filteredUpdates.password) {
+    filteredUpdates.password = await bcrypt.hash(filteredUpdates.password, 10);
+  }
+
+  return await Student.findByIdAndUpdate(id, filteredUpdates, {
+    new: true,
+    runValidators: true,
+    select: '-password'
+  });
+};
 
 
 export default {
@@ -58,5 +89,6 @@ export default {
   getStudentById,
   getStudentByUsername,
   updateStudentByUsername,
-  deleteStudentByUsername
+  deleteStudentByUsername,
+  updateOwnProfile
 };

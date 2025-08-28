@@ -49,25 +49,9 @@ const updateProfessorController = async (req, res) => {
     }
   };
 
-  const showProfessorThesesController = async (req, res) => {
-    try {
-      const theses = await professorService.showProfessorTheses(req.params.username);
-      if(!theses) return res.status(404).json({ error: 'Professor got no Theses assigned' });
-      res.json(theses);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
+  
 
-  const showThesesDetailsController = async (req, res) => {
-    try {
-      const theses = await professorService.showthesesdetails(req.params.id);
-      if(!theses) return res.status(404).json({ error: 'Theses not found' });
-      res.json(theses);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
+  
   
   export default{
     createProfessorController,
@@ -75,6 +59,4 @@ const updateProfessorController = async (req, res) => {
     deleteProfessorController,
     getProfessorController,
     updateProfessorController,
-    showProfessorThesesController,
-    showThesesDetailsController
   }

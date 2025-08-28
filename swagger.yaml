@@ -159,7 +159,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
+  
   /Professor/{username}:
     get:
       summary: Get a Professor by username
@@ -227,62 +227,7 @@ paths:
           description: Professor deleted successfully
         '404':
           description: Professor not found
-  /Professor/{username}/theses:
-    get:
-      summary: Get all Theses by Professor username
-      tags:
-        - Professor
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: username
-          in: path
-          required: true
-          schema:
-            type: string
-            example: prof1
-      responses:
-        '200':
-          description: List of theses for the given professor
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Theses'
-        '404':
-          description: Professor not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /Professor/{username}/theses/{id}:  
-    get:
-      summary: Get thesis details by ID
-      tags:
-        - Professor
-      security:
-        - bearerAuth: []
-      description: Returns detailed information about a specific thesis
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: "The unique ID of the thesis"
-      responses:
-        "200":
-          description: Thesis details retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ThesisDetails'
-        "400":
-          description: Invalid ID supplied
-        "404":
-          description: Thesis not found
-
+  
 
 
   /secretary:
@@ -631,6 +576,98 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /student/me:
+    patch:
+      summary: Update logged-in student's profile
+      description: >
+        Επιτρέπει στον φοιτητή να ενημερώσει τα στοιχεία του λογαριασμού του.  
+        Μόνο συγκεκριμένα πεδία μπορούν να τροποποιηθούν: street, number, city, postcode, email, landline_telephone, mobile_telephone, password.
+      tags:
+        - Student
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                street:
+                  type: string
+                  example: "Panepistimiou"
+                number:
+                  type: string
+                  example: "25"
+                city:
+                  type: string
+                  example: "Patras"
+                postcode:
+                  type: string
+                  example: "26223"
+                email:
+                  type: string
+                  format: email
+                  example: "student@example.com"
+                landline_telephone:
+                  type: string
+                  example: "2610123456"
+                mobile_telephone:
+                  type: string
+                  example: "6912345678"
+                password:
+                  type: string
+                  format: password
+                  example: "newStrongPassword123"
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Profile updated successfully"
+                  student:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "64a7c92f8b7c2a001f9d1234"
+                      username:
+                        type: string
+                        example: "stud01"
+                      name:
+                        type: string
+                        example: "Nikos"
+                      surname:
+                        type: string
+                        example: "Papadopoulos"
+                      email:
+                        type: string
+                        example: "student@example.com"
+                      city:
+                        type: string
+                        example: "Patras"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid email format"
+        "401":
+          description: Unauthorized – Missing or invalid token
+        "403":
+          description: Forbidden – Only students can access this endpoint
+        "404":
+          description: Student not found
+
 
   /student/{username}:
     get:
@@ -766,6 +803,58 @@ paths:
         '401':
           description: Unauthorized
 
+  /theses/me/invite:
+    patch:
+      summary: Student invites professors to committee
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+                    example: "professor1@uni.gr"
+      responses:
+        '200':
+          description: Invitations sent
+
+  /theses/{id}/respond:
+    patch:
+      summary: Professor responds to committee invitation
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Thesis ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                response:
+                  type: string
+                  enum: [accepted, rejected]
+                  example: accepted
+      responses:
+        '200':
+          description: Invitation response recorded
+
   /theses/{id}:
     get:
       summary: Get theses by ID
@@ -835,6 +924,7 @@ paths:
           description: Theses not found
         '403':
           description: Not authorized
+
   /theses/{id}/assign:
     post:
       summary: Assign a thesis to a student
@@ -882,6 +972,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /theses/professor/{username}/{id}:  
+    get:
+      summary: Get thesis details by ID
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      description: Returns detailed information about a specific thesis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The unique ID of the thesis"
+      responses:
+        "200":
+          description: Thesis details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThesisDetails'
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Thesis not found
   /theses/export:
     get:
       summary: Export all theses
@@ -950,6 +1066,328 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 
+
+  /theses/professor/me:
+    get:
+      summary: Get theses of the logged-in professor
+      description: Returns the list of theses assigned to the logged-in professor. Accessible only by users with role `professor` or `secretary`.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of theses assigned to the professor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    thesisId:
+                      type: string
+                      example: 64f1c2c5a7e8a21b9c123456
+                    title:
+                      type: string
+                      example: "AI in Healthcare"
+                    description:
+                      type: string
+                      example: "Exploring applications of AI in modern healthcare systems"
+                    status:
+                      type: string
+                      enum: [pending, active, completed, cancelled]
+                      example: "active"
+                    student:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "Γιάννης"
+                        surname:
+                          type: string
+                          example: "Παπαδόπουλος"
+                        studentNumber:
+                          type: string
+                          example: "20201234"
+                        email:
+                          type: string
+                          example: "giannis@example.com"
+        '401':
+          description: Unauthorized – no token provided or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden – user is not a professor or secretary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No theses assigned to this professor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /theses/student/me:
+    get:
+      summary: Get the logged-in student's thesis
+      description: Returns the thesis details for the currently authenticated student.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thesis details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  title:
+                    type: string
+                    example: Ανάπτυξη Συστήματος Τεχνητής Νοημοσύνης
+                  description:
+                    type: string
+                    example: Περιγραφή διπλωματικής εργασίας
+                  status:
+                    type: string
+                    enum: [pending, active, under_review, completed, cancelled]
+                    example: active
+                  professor:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: Γιάννης
+                      surname:
+                        type: string
+                        example: Παπαδόπουλος
+                      email:
+                        type: string
+                        example: giannis@example.com
+                  committee:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: Μαρία
+                        surname:
+                          type: string
+                          example: Κωνσταντίνου
+                        email:
+                          type: string
+                          example: maria@example.com
+                  attachment:
+                    type: string
+                    example: "http://localhost:3000/uploads/thesis123.pdf"
+                  assignedDate:
+                    type: string
+                    format: date-time
+                  daysSinceAssignment:
+                    type: integer
+                    example: 45
+        '401':
+          description: Unauthorized (no or invalid token)
+        '404':
+          description: No thesis found for this student
+
+  /theses/{id}/activate:
+    patch:
+      summary: activate thesis assignment (by Secretary)
+      description: Η Γραμματεία εγκρίνει την ανάθεση διπλωματικής, καταχωρώντας τον αριθμό και το έτος της ΓΣ.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ap_number
+                - ap_year
+              properties:
+                ap_number:
+                  type: string
+                  example: "15"
+                ap_year:
+                  type: string
+                  example: "2024"
+      responses:
+        '200':
+          description: Thesis activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '403':
+          description: Not authorized
+
+  /theses/{id}/cancel:
+    patch:
+      summary: Cancel thesis assignment (by Secretary)
+      description: Η Γραμματεία ακυρώνει την ανάθεση διπλωματικής, με καταχώρηση ΓΣ και λόγου ακύρωσης.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ap_number
+                - ap_year
+                - cancel_reason
+              properties:
+                ap_number:
+                  type: string
+                  example: "22"
+                ap_year:
+                  type: string
+                  example: "2024"
+                cancel_reason:
+                  type: string
+                  example: "Κατόπιν αίτησης φοιτητή"
+      responses:
+        '200':
+          description: Thesis cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '403':
+          description: Not authorized
+
+  /theses/{id}/complete:
+    patch:
+      summary: Complete thesis (by Secretary)
+      description: Η Γραμματεία ολοκληρώνει τη διπλωματική, καταχωρώντας βαθμό και σύνδεσμο στο Νημερτή.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 64f1c2c5a7e8a21b9c123456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - grade
+                - nimertis_link
+              properties:
+                grade:
+                  type: number
+                  format: float
+                  example: 8.5
+                nimertis_link:
+                  type: string
+                  format: uri
+                  example: "https://nemertes.lis.upatras.gr/jspui/handle/10889/12345"
+      responses:
+        '200':
+          description: Thesis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '403':
+          description: Not authorized
+  /theses/professor/invitations:
+    get:
+      summary: Get pending committee invitations for logged-in professor
+      description: Returns a list of thesis invitations where the logged-in professor is part of the committee and the status is pending.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of pending invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    thesisId:
+                      type: string
+                      example: 64f1c2c5a7e8a21b9c123456
+                    title:
+                      type: string
+                      example: "AI in Healthcare"
+                    studentName:
+                      type: string
+                      example: "Γιάννης"
+                    studentSurname:
+                      type: string
+                      example: "Παπαδόπουλος"
+                    studentNumber:
+                      type: string
+                      example: "20201234"
+                    invitationStatus:
+                      type: string
+                      example: "pending"
+        '401':
+          description: Unauthorized – no token provided or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden – user is not a professor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
 
 
 components:
@@ -1132,7 +1570,7 @@ components:
         importedBy:
           type: object
           properties:
-            _id:
+            _id: 
               type: string
               example: 64f1b123a7e8a21b9c654321
             username:
@@ -1167,28 +1605,40 @@ components:
           type: string
         username:
           type: string
+          example: stud1
         name:
           type: string
+          example: leo
         surname:
           type: string
+          example: ded
         student_number:
           type: string
+          example: 1104780
         street:
           type: string
+          example: kronou
         number:
           type: string
+          example: 6969696969
         city:
           type: string
+          example: Patra
         postcode:
           type: string
+          example: 1148
         father_name:
           type: string
+          example: leo
         landline_telephone:
           type: string
+          example: 2102102102
         mobile_telephone:
           type: string
+          example: 888888888
         email:
           type: string
+          example: leo@adjudhj.gr
         createdAt:
           type: string
         updatedAt:
@@ -1206,30 +1656,43 @@ components:
       properties:
         username:
           type: string
+          example: stud1
         password:
           type: string
+          example: test1234
         name:
           type: string
+          example: leo
         surname:
           type: string
+          example: ded
         student_number:
           type: string
+          example: 8888888
         street:
           type: string
+          example: kronou
         number:
           type: string
+          example: 6969696969
         city:
           type: string
+          example: Patra
         postcode:
           type: string
+          example: 11233
         father_name:
           type: string
+          example: leo
         landline_telephone:
           type: string
+          example: 2222222222
         mobile_telephone:
           type: string
+          example: 8888888888
         email:
           type: string
+          example: leo@leoleo.gr
 
     UpdateStudentRequest:
       type: object
@@ -1270,16 +1733,42 @@ components:
           type: string
         status:
           type: string
+          enum: [pending, active, under_review, completed, cancelled]
         assignedDate:
           type: string
+          format: date-time
         professor:
           type: string
         student:
           type: string
+        ap_number:
+          type: string
+          description: Αριθμός Γενικής Συνέλευσης
+          example: "15"
+        ap_year:
+          type: string
+          description: Έτος Γενικής Συνέλευσης
+          example: "2024"
+        cancel_reason:
+          type: string
+          description: Λόγος ακύρωσης ανάθεσης
+          example: "Κατόπιν αίτησης φοιτητή"
+        grade:
+          type: number
+          format: float
+          description: Βαθμός διπλωματικής
+          example: 8.5
+        nimertis_link:
+          type: string
+          format: uri
+          description: Σύνδεσμος προς το αποθετήριο Νημερτής
+          example: "https://nemertes.lis.upatras.gr/jspui/handle/10889/12345"
         createdAt:
           type: string
+          format: date-time
         updatedAt:
           type: string
+          format: date-time
 
     CreateThesesRequest:
       type: object
@@ -1290,8 +1779,6 @@ components:
         title:
           type: string
         description:
-          type: string
-        status:
           type: string
         professor:
           type: string
@@ -1306,3 +1793,5 @@ components:
           type: string
         status:
           type: string
+
+    

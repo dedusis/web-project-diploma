@@ -1,6 +1,7 @@
 import express from 'express';
 import thesesController from './controller.js';
 import { authenticateToken, authorizeRoles } from '../auth/middleware.js';
+import { exportThesesController } from '../export/controller.js';
 
 const router = express.Router();
 
@@ -11,14 +12,36 @@ router.post(
   authorizeRoles('professor', 'secretary'),
   thesesController.createThesesController
 );
-
+//show professor invitations
+router.get(
+  "/professor/invitations",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.showProfessorInvitationsController
+);
 // Get all theses (logged in users)
 router.get(
   '/',
   authenticateToken,
+  authorizeRoles('secretary'),
   thesesController.getAllThesesController
 );
 
+//show logged in professor theses
+router.get(
+  '/professor/me', 
+  authenticateToken, 
+  authorizeRoles('professor','secretary'), 
+  thesesController.showProfessorThesesController
+);
+
+//get student mythesis
+router.get(
+  "/student/me",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.getMyThesisController
+);
 
 // Get theses by id (logged in users)
 router.get(
@@ -26,6 +49,7 @@ router.get(
   authenticateToken,
   thesesController.getThesesByIdController
 );
+
 
 // Update theses (professor ή secretary)
 router.put(
@@ -43,11 +67,59 @@ router.delete(
   thesesController.deleteThesesController
 );
 
+// Assign thesis to student (professor ή secretary)
+
 router.post(
   '/:id/assign',
   authenticateToken,
   authorizeRoles('professor','secretary'),
-  thesesController.assignThesesController // Assign thesis to student (professor ή secretary)
+  thesesController.assignThesesController 
 );
+
+//secr actions
+router.patch(
+  "/:id/activate",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.activateThesisController
+);
+
+
+router.patch(
+  "/:id/cancel",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.cancelThesisController
+);
+
+router.patch(
+  "/:id/complete",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.completeThesisController
+);
+
+//student sends invitation
+router.patch(
+  "/me/invite",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.inviteProfessorsController
+);
+
+//prof respond
+router.patch(
+  "/:id/respond",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.respondInvitationController
+);
+router.get('/professor/:username/:id',
+   authenticateToken, 
+   authorizeRoles('professor','secretary'), 
+   thesesController.showThesesDetailsController);
+
+
+
 
 export default router;

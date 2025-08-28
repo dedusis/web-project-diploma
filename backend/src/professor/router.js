@@ -19,7 +19,4 @@ router.put('/:username', authenticateToken, authorizeRoles('secretary'), Profess
 //Delete user (secretary)
 router.delete('/:username', authenticateToken, authorizeRoles('secretary'), ProfessorController.deleteProfessorController);
 
-router.get('/:username/theses', authenticateToken, authorizeRoles('professor','secretary'), ProfessorController.showProfessorThesesController);
-
-router.get('/:username/theses/:id', authenticateToken, authorizeRoles('professor','secretary'), ProfessorController.showThesesDetailsController);
 export default router;

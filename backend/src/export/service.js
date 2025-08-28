@@ -2,8 +2,8 @@
 import Theses from '../theses/model.js';
 import { Parser } from 'json2csv';
 
-export const getAllTheses = async () => {
-  const theses = await Theses.find()
+export const getAllTheses = async (professorId) => {
+  const theses = await Theses.find({ professor: professorId })
     .populate('student', 'name surname student_number email')
     .populate('committee', 'name surname email')
     .lean()
