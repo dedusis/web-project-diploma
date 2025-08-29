@@ -18,6 +18,16 @@ const noteschema = new mongoose.Schema({
   }
 });
 
+const gradeSchema = new mongoose.Schema({
+  professor: { type: mongoose.Schema.Types.ObjectId, ref: 'Professor', required: true },
+  criteria: {
+    originality: { type: Number, required: true },
+    methodology: { type: Number, required: true },
+    presentation: { type: Number, required: true },
+    knowledge: { type: Number, required: true }
+  },
+  total: { type: Number, required: true }
+}, { timestamps: true });
 
 const thesesSchema = new mongoose.Schema(
   {
@@ -44,6 +54,10 @@ const thesesSchema = new mongoose.Schema(
       ref: "Professor",
       required: true
     },
+    gradingOpen: {
+      type: Boolean,
+      default: false
+    },
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
@@ -65,15 +79,13 @@ const thesesSchema = new mongoose.Schema(
     cancel_reason: {
       type: String 
     },
-    grade: {
-      type: Number,
-      min: 0,
-      max: 10 
-    },
+    grades: [gradeSchema],
     nimertis_link: {
       type: String 
     },
-    
+    activatedAt:{
+      type: Date
+    },
     committee: [{
       professor: { type: mongoose.Schema.Types.ObjectId, ref: "Professor" },
       status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
@@ -81,9 +93,21 @@ const thesesSchema = new mongoose.Schema(
       acceptedAt: { type: Date },
       rejectedAt: { type: Date }
     }],
+    readyForActivation: {
+      type: Boolean,
+      default: false,
+    },
     attachment: {
-      type: String // π.χ. URL αρχείου PDF
-    }
+      type: String 
+    },
+    draftFile: { 
+      type: String 
+    }, 
+    finalGrade: { type: Number },
+    extraLinks: [String],
+    examDate: { type: Date },
+    examMode: { type: String, enum: ["in_person", "online"] },
+    examLocation: { type: String }, 
   },
   {
     timestamps: true

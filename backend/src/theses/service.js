@@ -8,10 +8,6 @@ const createTheses = async (data) => {
   return await theses.save();
 };
 
-const getAllTheses = async () => {
-  return await Theses.find();
-};
-
 const getThesesById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid thesis ID");
@@ -22,6 +18,38 @@ const getThesesById = async (id) => {
     throw new Error("Thesis not found");
   }
   return thesis;
+};
+
+// Secretary: get theses with status = active or under_review (optional filter by status)
+const getActiveAndUnderReviewTheses = async (status) => {
+  let query = { 
+    $or: [
+      { status: { $in: ["active", "under_review"] } },
+      { readyForActivation: true }
+    ]
+  };
+
+  if (status && ["active", "under_review", "readyForActivation"].includes(status)) {
+    if (status === "readyForActivation") {
+      query = { readyForActivation: true };
+    } else {
+      query = { status };
+    }
+  }
+
+
+  const theses = await Theses.find(query)
+    .populate("professor", "name surname email")
+    .populate("student", "name surname email student_number")
+    .populate("committee.professor", "name surname email");
+
+  return theses.map(t => {
+    const daysSinceAssignment = t.assignedDate
+      ? Math.floor((Date.now() - t.assignedDate) / (1000 * 60 * 60 * 24))
+      : null;
+
+    return { ...t.toObject(), daysSinceAssignment };
+  });
 };
 
 const updateTheses = async (id, updates) => {
@@ -59,15 +87,21 @@ const assignThesesToStudent = async (thesesId, studentId) => {
 
 //secr actions
 const activateThesis = async (id, { ap_number, ap_year }) => {
-  return await Theses.findByIdAndUpdate(
-    id,
-    {
-      status: "active",
-      ap_number,
-      ap_year,
-    },
-    { new: true }
-  );
+  const thesis = await Theses.findById(id);
+  if (!thesis) throw new Error("Thesis not found");
+
+  if (!thesis.readyForActivation) {
+    throw new Error("Thesis is not ready for activation. Committee not complete.");
+  }
+
+  thesis.status = "active";
+  thesis.ap_number = ap_number;
+  thesis.ap_year = ap_year;
+  thesis.acceptedAt= new Date();
+  thesis.readyForActivation = false; // reset
+
+  await thesis.save();
+  return thesis;
 };
 
 const cancelThesis = async (id, { ap_number, ap_year, reason }) => {
@@ -83,16 +117,20 @@ const cancelThesis = async (id, { ap_number, ap_year, reason }) => {
   );
 };
 
-const completeThesis = async (id, { grade, nymerti_link }) => {
-  return await Theses.findByIdAndUpdate(
-    id,
-    {
-      status: "completed",
-      grade,
-      nymerti_link,
-    },
-    { new: true }
-  );
+const completeThesis = async (id) => {
+  const thesis = await Theses.findById(id);
+  if (!thesis) throw new Error("Thesis not found");
+
+  if (!thesis.finalGrade) {
+    throw new Error("Final grade is missing");
+  }
+  if (!thesis.nimertis_link) {
+    throw new Error("Nimertis link is missing");
+  }
+
+  thesis.status = "completed";
+  await thesis.save();
+  return thesis;
 };
 
 //function for get my thesis
@@ -100,7 +138,7 @@ const getThesisByStudent = async (studentId) => {
   const thesis = await Theses.findOne({ student: studentId })
     select("-notes")
     .populate("professor", "name surname email")
-    .populate("student", "name surname email");
+    .populate("student", "name surname student_number email");
 
   if (!thesis) {
     throw new Error("No thesis found for this student");
@@ -130,6 +168,11 @@ const inviteProfessors = async (studentId, professorEmails) => {
   }
 
   professors.forEach((prof) => {
+
+    if (prof._id.toString() === thesis.professor.toString()) {
+      throw new Error(`Professor ${prof.email} is the supervisor and cannot be invited to the committee`);
+    }
+
     const existingInvitation = thesis.committee.find(
       (inv) => inv.professor.toString() === prof._id.toString()
     );
@@ -175,22 +218,234 @@ const respondInvitation = async (professorId, thesisId, response) => {
       throw new Error("Invalid response. Must be 'accepted' or 'rejected'");
   }
 
-  // if >= 2 accepted -> thesis.active
+  // if >= 2 accepted -> is ready for activation
   const acceptedCount = thesis.committee.filter(
     (inv) => inv.status === "accepted"
   ).length;
 
   if (acceptedCount >= 2) {
-    thesis.status = "active";
+    thesis.readyForActivation = true; 
     thesis.assignedDate = new Date();
+    thesis.committee.forEach((inv) => {
+      if (inv.status === "pending") {
+        inv.status = "rejected";
+      }
+    });
   } else {
-    thesis.status = "pending"; // <--- γύρνα το πάλι σε pending
+    thesis.readyForActivation = false; 
   }
 
 
   await thesis.save();
   return thesis.populate("committee.professor", "name surname email");
 };
+
+const uploadDraft = async (studentId, { draftFile, extraLinks }) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "active") {
+    throw new Error("Draft can only be uploaded when thesis is active");
+  }
+
+  thesis.draftFile = draftFile || thesis.draftFile;
+  thesis.extraLinks = extraLinks || thesis.extraLinks;
+  thesis.status = "under_review"; 
+
+  await thesis.save();
+  return thesis;
+};
+
+// Student sets exam details
+const setExamDetails = async (studentId, { examDate, examMode, examLocation }) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "under_review") {
+    throw new Error("Exam details can only be set when thesis is under review");
+  }
+
+  thesis.examDate = examDate;
+  thesis.examMode = examMode;
+  thesis.examLocation = examLocation;
+
+  await thesis.save();
+  return thesis;
+};
+
+//supervisor opens grading
+const openGrading = async (professorId, thesisId) => {
+  const thesis = await Theses.findById(thesisId);
+  if (!thesis) throw new Error("Thesis not found");
+
+  // Only supervisor have access
+  if (thesis.professor.toString() !== professorId.toString()) {
+    throw new Error("Only the supervisor can open grading");
+  }
+
+  if (thesis.gradingOpen) {
+    throw new Error("Grading is already open");
+  }
+
+  thesis.gradingOpen = true;
+  await thesis.save();
+
+  return thesis;
+};
+
+// Professor sets grade
+const setGrade = async (id, professorId, gradeData) => {
+  const thesis = await Theses.findById(id)
+    .populate("professor", "name surname email")
+    .populate("committee.professor", "name surname email")
+    .populate("student", "name surname student_number email");
+
+  if (!thesis) throw new Error("Thesis not found");
+  if (!thesis.gradingOpen) throw new Error("Grading is not open for this thesis");
+
+  // Supervisor or comittee prof
+  const isSupervisor = thesis.professor._id.toString() === professorId.toString();
+  const isCommittee = thesis.committee.some(
+    (inv) => inv.professor._id.toString() === professorId.toString()
+  );
+  if (!isSupervisor && !isCommittee) {
+    throw new Error("You are not part of this committee");
+  }
+
+  // check for existing grade
+  const alreadyGraded = thesis.grades.some(
+    (g) => g.professor.toString() === professorId.toString()
+  );
+  if (alreadyGraded) throw new Error("Professor has already graded this thesis");
+
+  // calc total = MO criteria
+  const { originality, methodology, presentation, knowledge } = gradeData.criteria;
+  const total =
+    (originality + methodology + presentation + knowledge) / 4;
+
+  // save grade
+  thesis.grades.push({
+    professor: professorId,
+    criteria: gradeData.criteria,
+    total: Number(total.toFixed(2)),
+  });
+
+  if (thesis.grades.length === 3) {
+    const totals = thesis.grades.map((g) => g.total);
+    const avg = totals.reduce((a, b) => a + b, 0) / totals.length;
+    thesis.finalGrade = Number(avg.toFixed(2));
+  }
+
+  await thesis.save();
+  return thesis;
+};
+
+//get prof's grades
+const getGrades = async (professorId, thesisId) => {
+  const thesis = await Theses.findById(thesisId)
+    .populate("grades.professor", "name surname email")
+    .populate("professor", "name surname email")
+    .populate("committee.professor", "name surname email");
+
+  if (!thesis) throw new Error("Thesis not found");
+
+  const isSupervisor = thesis.professor._id.toString() === professorId.toString();
+  const isCommittee = thesis.committee.some(
+    (inv) => inv.professor && inv.professor._id.toString() === professorId.toString()
+  );
+  if (!isSupervisor && !isCommittee) {
+    throw new Error("You are not part of this committee");
+  }
+
+  return {
+    thesisId: thesis._id,
+    grades: thesis.grades,
+    finalGrade: thesis.finalGrade || null
+  };
+};
+
+// Student gets praktiko (HTML)
+const getPraktiko = async (studentId) => {
+  const thesis = await Theses.findOne({ student: studentId })
+    .populate("professor", "name surname email")
+    .populate("committee.professor", "name surname email")
+    .populate("student", "name surname email student_number");
+
+  if (!thesis) throw new Error("No thesis found for this student");
+  if (thesis.status !== "completed") {
+    throw new Error("Praktiko is available only after thesis is completed");
+  }
+
+  let html = `
+    <html>
+      <head>
+        <title>Πρακτικό Εξέτασης - ${thesis.title}</title>
+      </head>
+      <body>
+        <h1>Πρακτικό Εξέτασης</h1>
+        <h2>Τίτλος: ${thesis.title}</h2>
+        <p><b>Φοιτητής:</b> ${thesis.student.name} ${thesis.student.surname} (${thesis.student.email})</p>
+        <p><b>Επιβλέπων:</b> ${thesis.professor.name} ${thesis.professor.surname} (${thesis.professor.email})</p>
+        <p><b>Ημερομηνία Εξέτασης:</b> ${thesis.examDate ? thesis.examDate.toLocaleString() : "-"}</p>
+
+        <h3>Βαθμολογίες</h3>
+        <ul>
+  `;
+
+  thesis.grades.forEach(g => {
+    html += `
+      <li>
+        <b>${g.professor.name} ${g.professor.surname}</b> 
+        (Σύνολο: ${g.total})<br>
+        - Originality: ${g.criteria.originality}<br>
+        - Methodology: ${g.criteria.methodology}<br>
+        - Presentation: ${g.criteria.presentation}<br>
+        - Knowledge: ${g.criteria.knowledge}
+      </li>
+    `;
+  });
+
+  html += `
+        </ul>
+        <h2>Τελικός Βαθμός: ${thesis.finalGrade}</h2>
+      </body>
+    </html>
+  `;
+
+  return html;
+};
+
+// Student adds Nimertis link
+const setNimertisLink = async (studentId, { nimertis_link }) => {
+  const thesis = await Theses.findOne({ student: studentId });
+  if (!thesis) throw new Error("No thesis found for this student");
+
+  if (thesis.status !== "completed") {
+    throw new Error("You can only set the Nimertis link after completion");
+  }
+
+  thesis.nimertis_link = nimertis_link;
+  //thesis.status = "completed"; (gets completed automatically)
+  await thesis.save();
+
+  return thesis;
+};
+
+// View completed thesis info + exam record
+const getCompletedThesis = async (id) => {
+  const thesis = await Theses.findById(id)
+    .populate("professor", "name surname email")
+    .populate("student", "name surname email")
+    .populate("committee.professor", "name surname email");
+
+  if (!thesis) throw new Error("Thesis not found");
+  if (thesis.status !== "completed") {
+    throw new Error("Thesis is not completed yet");
+  }
+
+  return thesis; 
+};
+
 const showProfessorTheses = async (professorId,filters={}) => {
     const theses = await Theses.find({
         $or:[
@@ -415,7 +670,7 @@ const cancelThesesByProfessor = async(thesisid,professorId,apNumber,apYear) => {
   if (theses.status!== "active") {
     throw new Error("Only active theses can be canceled by the professor");
   }
-  const twoYears = new Date(theses.assignedDate);
+  const twoYears = new Date(theses.activatedAt);
   twoYears.setFullYear(twoYears.getFullYear() + 2);
   if (new Date() < twoYears) {
     throw new Error("Thesis can only be canceled after 2 years from the assigned date");
@@ -448,8 +703,8 @@ const changeToUnderReview = async(thesesId,professorId) => {
 }
 export default {
   createTheses,
-  getAllTheses,
   getThesesById,
+  getActiveAndUnderReviewTheses,
   updateTheses,
   assignThesesToStudent,
   deleteTheses,
@@ -461,6 +716,14 @@ export default {
   showProfessorTheses,
   inviteProfessors,
   respondInvitation,
+  uploadDraft,
+  setExamDetails,
+  openGrading,
+  setGrade,
+  getGrades,
+  getPraktiko,
+  setNimertisLink,
+  getCompletedThesis,
   showthesesdetails,
   getInvitedProfessors,
   unassignThesisFromStudent,

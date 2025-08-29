@@ -1,3 +1,4 @@
+import { get } from "http";
 import thesesService from "./service.js";
 
 const createThesesController = async (req, res) => {
@@ -8,8 +9,6 @@ const createThesesController = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };;
-
-
 const getAllThesesController = async (req, res) => {
   try {
     const theses = await thesesService.getAllTheses();
@@ -18,7 +17,6 @@ const getAllThesesController = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 const getThesesByIdController = async (req, res) => {
   try {
     const theses = await thesesService.getThesesById(req.params.id);
@@ -28,6 +26,18 @@ const getThesesByIdController = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+//get theses status = active or status = under_review
+const getActiveAndUnderReviewController = async (req, res) => {
+  try {
+    const { status } = req.query; 
+    const theses = await thesesService.getActiveAndUnderReviewTheses(status);
+    res.json(theses);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 
 const updateThesesController = async (req, res) => {
   try {
@@ -83,9 +93,8 @@ const cancelThesisController = async (req, res) => {
 
 const completeThesisController = async (req, res) => {
   try {
-    const updated = await thesesService.completeThesis(req.params.id, req.body);
-    if (!updated) return res.status(404).json({ error: "Thesis not found" });
-    res.json({ message: "Thesis marked as completed", thesis: updated });
+    const thesis = await thesesService.completeThesis(req.params.id);
+    res.json(thesis);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -173,6 +182,138 @@ const showProfessorInvitationsController = async (req,res) => {
   catch(err){
     res.status(500).json({error:err.message});
   }
+};  
+const uploadDraftController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { draftFile, extraLinks } = req.body;
+
+    const updatedThesis = await thesesService.uploadDraft(studentId, { draftFile, extraLinks });
+
+    res.json({
+      message: "Draft uploaded successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Student sets exam details
+const setExamDetailsController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { examDate, examMode, examLocation } = req.body;
+
+    const updatedThesis = await thesesService.setExamDetails(studentId, {
+      examDate,
+      examMode,
+      examLocation
+    });
+
+    res.json({
+      message: "Exam details set successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Professor sets grade
+const openGradingController = async (req, res) => {
+  try {
+    const professorId = req.user.id; 
+    const thesisId = req.params.id;
+
+    const updatedThesis = await thesesService.openGrading(professorId, thesisId);
+
+    res.json({
+      message: "Grading is now open for this thesis",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Professor sets grade
+const setGradeController = async (req, res) => {
+  try {
+    const professorId = req.user.id;
+    const thesisId = req.params.id;
+    const { criteria } = req.body; // μόνο τα criteria
+
+    if (
+      !criteria ||
+      typeof criteria.originality !== "number" ||
+      typeof criteria.methodology !== "number" ||
+      typeof criteria.presentation !== "number" ||
+      typeof criteria.knowledge !== "number"
+    ) {
+      return res.status(400).json({ error: "All criteria must be numbers" });
+    }
+
+    const updatedThesis = await thesesService.setGrade(thesisId, professorId, { criteria });
+
+    res.json({
+      message: "Grade submitted successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+//get prof's grades
+const getGradesController = async (req, res) => {
+  try {
+    const professorId = req.user.id;
+    const thesisId = req.params.id;
+
+    const grades = await thesesService.getGrades(professorId, thesisId);
+    res.json(grades);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+//students praktiko
+const getPraktikoController = async (req, res) => {
+  try {
+    const html = await thesesService.getPraktiko(req.user.id);
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Student sets Nimertis link
+const setNimertisLinkController = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { nimertis_link } = req.body;
+
+    const updatedThesis = await thesesService.setNimertisLink(studentId, { nimertis_link });
+
+    res.json({
+      message: "Nimertis link set successfully",
+      thesis: updatedThesis
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// View completed thesis info + exam record
+const getCompletedThesisController = async (req, res) => {
+  try {
+    const thesis = await thesesService.getCompletedThesis(req.params.id);
+    res.json(thesis);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 const getInvitedProfessorsController = async (req, res) => {
@@ -249,8 +390,8 @@ const changeToUnderReviewcontroller = async(req,res) => {
 };
 export default {
   createThesesController,
-  getAllThesesController,
   getThesesByIdController,
+  getActiveAndUnderReviewController,
   updateThesesController,
   assignThesesController,
   deleteThesesController,
@@ -268,5 +409,14 @@ export default {
   addNotesController,
   viewMyNotes,
   cancelThesesByProfessorcontroller,
-  changeToUnderReviewcontroller
+  changeToUnderReviewcontroller,
+  uploadDraftController,
+  setExamDetailsController,
+  openGradingController,
+  setGradeController,
+  getGradesController,
+  getPraktikoController,
+  setNimertisLinkController,
+  getCompletedThesisController,
+  getAllThesesController
 };

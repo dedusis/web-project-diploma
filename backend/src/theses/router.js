@@ -12,22 +12,31 @@ router.post(
   authorizeRoles('professor', 'secretary'),
   thesesController.createThesesController
 );
-//show professor invitations
+
+// Show professor invitations
 router.get(
   "/professor/invitations",
   authenticateToken,
   authorizeRoles("professor"),
   thesesController.showProfessorInvitationsController
 );
+
 // Get all theses (logged in users)
 router.get(
-  '/',
+  '/all',
   authenticateToken,
-  authorizeRoles('secretary'),
   thesesController.getAllThesesController
 );
 
-//show logged in professor theses
+// Get theses status = active or status = under_review
+router.get(
+  "/",
+  authenticateToken,
+  authorizeRoles("secretary"),
+  thesesController.getActiveAndUnderReviewController
+);
+
+// Show logged in professor theses
 router.get(
   '/professor/me', 
   authenticateToken, 
@@ -35,7 +44,7 @@ router.get(
   thesesController.showProfessorThesesController
 );
 
-//get student mythesis
+// Get student myThesis
 router.get(
   "/student/me",
   authenticateToken,
@@ -49,7 +58,6 @@ router.get(
   authenticateToken,
   thesesController.getThesesByIdController
 );
-
 
 // Update theses (professor ή secretary)
 router.put(
@@ -68,7 +76,6 @@ router.delete(
 );
 
 // Assign thesis to student (professor ή secretary)
-
 router.post(
   '/:id/assign',
   authenticateToken,
@@ -76,14 +83,13 @@ router.post(
   thesesController.assignThesesController 
 );
 
-//secr actions
+// Secretary actions
 router.patch(
   "/:id/activate",
   authenticateToken,
   authorizeRoles("secretary"),
   thesesController.activateThesisController
 );
-
 
 router.patch(
   "/:id/cancel",
@@ -99,7 +105,7 @@ router.patch(
   thesesController.completeThesisController
 );
 
-//student sends invitation
+// Student sends invitation
 router.patch(
   "/me/invite",
   authenticateToken,
@@ -107,7 +113,7 @@ router.patch(
   thesesController.inviteProfessorsController
 );
 
-//prof respond
+// Professor responds
 router.patch(
   "/:id/respond",
   authenticateToken,
@@ -115,16 +121,83 @@ router.patch(
   thesesController.respondInvitationController
 );
 
-router.get('/professor/:username/:id',
-   authenticateToken, 
-   authorizeRoles('professor','secretary'), 
-   thesesController.showThesesDetailsController);
+// Student uploads draft
+router.patch(
+  "/me/draft",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.uploadDraftController
+);
+
+// Student sets exam details
+router.patch(
+  "/me/exam",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.setExamDetailsController
+);
+
+// Professor opens grading
+router.patch(
+  "/:id/open-grading",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.openGradingController
+);
+
+// Professor sets grade
+router.patch(
+  "/:id/grade",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.setGradeController
+);
+
+// Get grades
+router.get(
+  "/:id/grades",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.getGradesController
+);
+
+// Student praktiko (HTML)
+router.get(
+  "/me/praktiko",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.getPraktikoController
+);
+
+// Student sets Nimertis link
+router.patch(
+  "/me/nimertis",
+  authenticateToken,
+  authorizeRoles("student"),
+  thesesController.setNimertisLinkController
+);
+
+// View completed thesis info + exam record
+router.get(
+  "/:id/completed",
+  authenticateToken,
+  authorizeRoles("student", "professor", "secretary"),
+  thesesController.getCompletedThesisController
+);
 
 router.get(
-    '/:id/committee',
-    authenticateToken,
-    authorizeRoles('professor','secretary'),
-    thesesController.getInvitedProfessorsController);
+  '/professor/:username/:id',
+  authenticateToken, 
+  authorizeRoles('professor','secretary'), 
+  thesesController.showThesesDetailsController
+);
+
+router.get(
+  '/:id/committee',
+  authenticateToken,
+  authorizeRoles('professor','secretary'),
+  thesesController.getInvitedProfessorsController
+);
 
 router.patch(
   '/:id/unassign',
@@ -159,5 +232,11 @@ router.get(
   authenticateToken,
   authorizeRoles('professor'),
   thesesController.viewMyNotes
+);
+router.get(
+  '/export',
+  authenticateToken,
+  authorizeRoles('secretary'),
+  exportThesesController
 );
 export default router;

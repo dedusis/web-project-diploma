@@ -579,9 +579,6 @@ paths:
   /student/me:
     patch:
       summary: Update logged-in student's profile
-      description: >
-        Επιτρέπει στον φοιτητή να ενημερώσει τα στοιχεία του λογαριασμού του.  
-        Μόνο συγκεκριμένα πεδία μπορούν να τροποποιηθούν: street, number, city, postcode, email, landline_telephone, mobile_telephone, password.
       tags:
         - Student
       security:
@@ -736,6 +733,7 @@ paths:
           description: Student deleted successfully
         '404':
           description: Student not found
+
   /student/id/{id}:
     get:
       summary: Get a student by ID
@@ -764,6 +762,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /theses:
     post:
       summary: Create a new theses
@@ -786,22 +785,33 @@ paths:
           description: Not authorized
 
     get:
-      summary: Get all theses
+      summary: Theses list (active, under_review, or readyForActivation)
       tags:
         - Theses
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, under_review, readyForActivation]
+          required: false
+          description: |
+            Filter:
+              - active 
+              - under_review 
+              - readyForActivation 
       responses:
-        '200':
-          description: List of theses
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Theses'
-        '401':
-          description: Unauthorized
+                  $ref: "#/components/schemas/Theses"
+        "403":
+          description: Not authorized
 
   /theses/me/invite:
     patch:
@@ -809,37 +819,93 @@ paths:
       security:
         - bearerAuth: []
       tags:
-        - Theses
+        - Theses (Student)
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - emails
               properties:
                 emails:
                   type: array
                   items:
                     type: string
+                    format: email
                     example: "professor1@uni.gr"
       responses:
-        '200':
-          description: Invitations sent
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: "64f23b7c12a9b21e0c9a1234"
+                  title:
+                    type: string
+                    example: "Σύστημα Διαχείρισης Διπλωματικών"
+                  committee:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        professor:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: "64f23b7c12a9b21e0c9a5678"
+                            name:
+                              type: string
+                              example: "Γιάννης"
+                            surname:
+                              type: string
+                              example: "Παπαδόπουλος"
+                            email:
+                              type: string
+                              example: "professor1@uni.gr"
+                        status:
+                          type: string
+                          enum: [pending, accepted, rejected]
+                          example: "pending"
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No professors found with these emails"
+        "403":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Professor professor1@uni.gr is the supervisor and cannot be invited to the committee"
+
 
   /theses/{id}/respond:
     patch:
       summary: Professor responds to committee invitation
+      tags:
+        - Theses (Professor)
       security:
         - bearerAuth: []
-      tags:
-        - Theses
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
-          description: Thesis ID
+          description: The ID of the thesis
       requestBody:
         required: true
         content:
@@ -853,7 +919,19 @@ paths:
                   example: accepted
       responses:
         '200':
-          description: Invitation response recorded
+          description: Invitation response recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theses'
+        '400':
+          description: Invalid request or professor not invited
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden – only invited professors can respond
+        '404':
+          description: Thesis not found
 
   /theses/{id}:
     get:
@@ -930,7 +1008,7 @@ paths:
       summary: Assign a thesis to a student
       description: Assigns a thesis to a student by IDs. Only professors or secretaries can perform this action.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
@@ -976,7 +1054,7 @@ paths:
     get:
       summary: Get thesis details by ID
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       description: Returns detailed information about a specific thesis
@@ -1003,7 +1081,7 @@ paths:
       summary: Export all theses
       description: Exports the list of all theses in machine-readable format (JSON or CSV). Only accessible by professors and secretaries.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
@@ -1069,7 +1147,7 @@ paths:
     patch:
       summary: Unassign thesis from student
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       description: Unassigns the thesis from the currently assigned student. Only professors or secretaries can perform this action.
@@ -1101,7 +1179,7 @@ paths:
     patch:
       summary: Cancel a thesis assignment (supervisor only)
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       description: >
@@ -1154,7 +1232,7 @@ paths:
         Επιτρέπει στον επιβλέποντα Καθηγητή να αλλάξει το status μίας διπλωματικής εργασίας σε "under review".
         Μόνο ο supervising professor έχει το δικαίωμα να εκτελέσει αυτή τη λειτουργία.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
@@ -1220,7 +1298,7 @@ paths:
     get:
       summary: View professor's notes for a thesis
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       description: >
@@ -1273,7 +1351,7 @@ paths:
     post:
       summary: Add a note to a thesis
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
@@ -1327,7 +1405,7 @@ paths:
         Only the supervising professor, invited professors, or the secretary can
         view this information.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       parameters:
@@ -1402,7 +1480,7 @@ paths:
       summary: Get theses of the logged-in professor
       description: Returns the list of theses assigned to the logged-in professor. Accessible only by users with role `professor` or `secretary`.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       responses:
@@ -1472,7 +1550,7 @@ paths:
       summary: Get the logged-in student's thesis
       description: Returns the thesis details for the currently authenticated student.
       tags:
-        - Theses
+        - Theses (Student)
       security:
         - bearerAuth: []
       responses:
@@ -1535,12 +1613,429 @@ paths:
         '404':
           description: No thesis found for this student
 
+  /theses/me/draft:
+    patch:
+      summary: Student uploads draft thesis file and additional links
+      description: >
+        Ο φοιτητής ανεβάζει το πρόχειρο κείμενο (ως URL/path αρχείου)
+        και προαιρετικά συνδέσμους προς εξωτερικό υλικό (Google Drive, YouTube κλπ).
+        Με την καταχώρηση, η διπλωματική περνάει σε status **under_review**.
+      tags:
+        - Theses (Student)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                draftFile:
+                  type: string
+                  example: "https://fileserver.com/thesis_draft_123.pdf"
+                extraLinks:
+                  type: array
+                  items:
+                    type: string
+                  example: ["https://drive.google.com/file/xyz", "https://youtu.be/abcd1234"]
+      responses:
+        '200':
+          description: Draft uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Draft uploaded successfully"
+                theses:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: "68a63250f91675bd18b2fb60"
+                      title:
+                        type: string
+                        example: "Εφαρμογή Τεχνητής Νοημοσύνης σε Ιατρικές Διαγνώσεις"
+                      status:
+                        type: string
+                        example: "under_review"
+                      draftFile:
+                        type: string
+                        example: "https://fileserver.com/thesis_draft_123.pdf"
+                      extraLinks:
+                        type: array
+                        items:
+                          type: string
+                        example: ["https://drive.google.com/file/xyz", "https://youtu.be/abcd1234"]
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No thesis found for this student"
+
+  /theses/me/exam:
+    patch:
+      summary: "Student sets exam details"
+      description: >
+        Ο φοιτητής καταχωρεί ημερομηνία, τρόπο και χώρο εξέτασης. 
+        Επιτρέπεται μόνο όταν η διπλωματική είναι σε κατάσταση "under_review".
+      tags:
+        - Theses (Student)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                examDate:
+                  type: string
+                  format: date-time
+                  example: "2025-09-15T10:00:00.000Z"
+                examMode:
+                  type: string
+                  enum: ["in_person", "online"]
+                  example: "in_person"
+                examLocation:
+                  type: string
+                  example: "Αίθουσα Β2, Τμήμα Πληροφορικής"
+      responses:
+        "200":
+          description: "Exam details set successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Exam details set successfully"
+                  theses:
+                    $ref: "#/components/schemas/Theses"
+        "400":
+          description: "Bad request (e.g. thesis not under review)"
+        "404":
+          description: "Thesis not found"
+
+  /theses/me/praktiko:
+    get:
+      summary: "Student gets praktiko (HTML)"
+      description: >
+        Ο φοιτητής βλέπει το πρακτικό εξέτασης (HTML).  
+        Το πρακτικό είναι διαθέσιμο μόνο αν η διπλωματική έχει ολοκληρωθεί (`status = completed`).
+      tags:
+        - Theses (Student)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Επιστροφή πρακτικού σε μορφή HTML"
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <html>
+                    <head><title>Πρακτικό Εξέτασης</title></head>
+                    <body>
+                      <h1>Πρακτικό Εξέτασης</h1>
+                      <h2>Τίτλος: Web</h2>
+                      <p><b>Φοιτητής:</b> Γιάννης Παπαδόπουλος (gp@example.com)</p>
+                      <p><b>Επιβλέπων:</b> Νίκος Καθηγητής (nk@example.com)</p>
+                      <h3>Βαθμολογίες</h3>
+                      <ul>
+                        <li>Νίκος Καθηγητής (Σύνολο: 8.5)</li>
+                        <li>Μαρία Επιτροπή (Σύνολο: 9.0)</li>
+                        <li>Πέτρος Επιτροπή (Σύνολο: 8.0)</li>
+                      </ul>
+                      <h2>Τελικός Βαθμός: 8.5</h2>
+                    </body>
+                  </html>
+        '400':
+          description: "Σφάλμα - δεν βρέθηκε ή δεν έχει ολοκληρωθεί η διπλωματική"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Praktiko is available only after thesis is completed"
+        '401':
+          description: "Unauthorized - απαιτείται σύνδεση φοιτητή"
+
+  /theses/me/nimertis:
+    patch:
+      summary: Student sets Nimertis link
+      description: Ο φοιτητής καταχωρεί το URL στο αποθετήριο της βιβλιοθήκης (Νημερτής), μόνο αφού η διπλωματική είναι completed.
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses (Student)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nimertis_link:
+                  type: string
+                  example: "https://nemertes.library.upatras.gr/jspui/handle/10889/12345"
+      responses:
+        "200":
+          description: Nimertis link added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Nimertis link set successfully"
+                  thesis:
+                    $ref: "#/components/schemas/Theses"
+        "400":
+          description: Bad Request
+
+  /theses/{id}/open-grading:
+    patch:
+      summary: Supervisor opens grading for the thesis
+      tags:
+        - Theses (Professor)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Thesis ID
+      responses:
+        "200":
+          description: Grading opened successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Grading is now open for this thesis
+                  theses:
+                    $ref: "#/components/schemas/Theses"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /theses/{id}/grade:
+    patch:
+      summary: Professor set grads for thesis 
+      tags:
+        - Theses (Professor)
+      description: >
+        Ο επιβλέπων καθηγητής ή μέλος της τριμελούς καταχωρεί βαθμό για τη διπλωματική.
+        Το `total` υπολογίζεται αυτόματα από τα κριτήρια. Όταν όλοι οι 3 καθηγητές βαθμολογήσουν,
+        υπολογίζεται το `finalGrade` και η διπλωματική ολοκληρώνεται.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID της διπλωματικής
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                criteria:
+                  type: object
+                  required:
+                    - originality
+                    - methodology
+                    - presentation
+                    - knowledge
+                  properties:
+                    originality:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+                    methodology:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+                    presentation:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+                    knowledge:
+                      type: number
+                      minimum: 0
+                      maximum: 10
+              example:
+                criteria:
+                  originality: 8
+                  methodology: 7
+                  presentation: 9
+                  knowledge: 8
+      responses:
+        '200':
+          description: Ενημερωμένη διπλωματική με το νέο βαθμό
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Grade submitted successfully"
+                  thesis:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      title:
+                        type: string
+                      status:
+                        type: string
+                        enum: ["pending", "active", "under_review", "completed", "cancelled"]
+                      grades:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            professor:
+                              type: string
+                            criteria:
+                              type: object
+                              properties:
+                                originality:
+                                  type: number
+                                methodology:
+                                  type: number
+                                presentation:
+                                  type: number
+                                knowledge:
+                                  type: number
+                            total:
+                              type: number
+                      finalGrade:
+                        type: number
+        '400':
+          description: Input error or the teacher does not belong to the committee
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You are not part of this committee"
+
+  /theses/{id}/grades:
+    get:
+      summary: Get all grades for a thesis
+      description: >
+        Επιτρέπει σε μέλος της τριμελούς (επιβλέπων ή καθηγητής committee) να δει
+        όλους τους βαθμούς που έχουν καταχωρηθεί για τη συγκεκριμένη διπλωματική.
+      tags:
+        - Theses (Professor)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Το ID της διπλωματικής
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Grades retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thesisId:
+                    type: string
+                  grades:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        professor:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            name:
+                              type: string
+                            surname:
+                              type: string
+                            email:
+                              type: string
+                        criteria:
+                          type: object
+                          properties:
+                            originality:
+                              type: number
+                            methodology:
+                              type: number
+                            presentation:
+                              type: number
+                            knowledge:
+                              type: number
+                        total:
+                          type: number
+                          format: float
+                  finalGrade:
+                    type: number
+                    format: float
+                    description: Ο τελικός βαθμός (αν έχουν βαθμολογήσει και οι 3)
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Unauthorized – Δεν υπάρχει ή δεν είναι έγκυρο το token
+        "403":
+          description: Forbidden – Ο καθηγητής δεν ανήκει στην τριμελή
+        "404":
+          description: Thesis not found
+
   /theses/{id}/activate:
     patch:
       summary: activate thesis assignment (by Secretary)
-      description: Η Γραμματεία εγκρίνει την ανάθεση διπλωματικής, καταχωρώντας τον αριθμό και το έτος της ΓΣ.
       tags:
-        - Theses
+        - Theses (Secretary)
       security:
         - bearerAuth: []
       parameters:
@@ -1581,7 +2076,7 @@ paths:
       summary: Cancel thesis assignment (by Secretary)
       description: Η Γραμματεία ακυρώνει την ανάθεση διπλωματικής, με καταχώρηση ΓΣ και λόγου ακύρωσης.
       tags:
-        - Theses
+        - Theses (Secretary)
       security:
         - bearerAuth: []
       parameters:
@@ -1623,16 +2118,41 @@ paths:
 
   /theses/{id}/complete:
     patch:
-      summary: Complete thesis (by Secretary)
-      description: Η Γραμματεία ολοκληρώνει τη διπλωματική, καταχωρώντας βαθμό και σύνδεσμο στο Νημερτή.
+      summary: Ολοκλήρωση ΔΕ (μόνο από τη Γραμματεία)
       tags:
-        - Theses
+        - Theses (Secretary)
       security:
         - bearerAuth: []
       parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID της διπλωματικής
+      responses:
+        "200":
+          description: Η διπλωματική ολοκληρώθηκε
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Theses"
+        '403':
+          description: Not authorized
+
+
+  /theses/{id}/completed:
+    get:
+      summary: View completed thesis info and exam record
+      description: Διαθέσιμο μόνο αν η διπλωματική είναι σε κατάσταση "completed". Επιστρέφει πληροφορίες, βαθμολογία και πρακτικό εξέτασης.
+      security:
+        - bearerAuth: []
+      tags:
+        - Theses 
+      parameters:
         - name: id
           in: path
-          required: true
+          required: true 
           schema:
             type: string
           example: 64f1c2c5a7e8a21b9c123456
@@ -1668,7 +2188,7 @@ paths:
       summary: Get pending committee invitations for logged-in professor
       description: Returns a list of thesis invitations where the logged-in professor is part of the committee and the status is pending.
       tags:
-        - Theses
+        - Theses (Professor)
       security:
         - bearerAuth: []
       responses:
@@ -2052,8 +2572,57 @@ components:
         email:
           type: string
 
+    Grade:
+      type: object
+      required:
+        - professor
+        - criteria
+        - total
+      properties:
+        professor:
+          type: string
+          description: ID του καθηγητή
+        criteria:
+          type: object
+          required:
+            - originality
+            - methodology
+            - presentation
+            - knowledge
+          properties:
+            originality:
+              type: number
+              minimum: 0
+              maximum: 10
+            methodology:
+              type: number
+              minimum: 0
+              maximum: 10
+            presentation:
+              type: number
+              minimum: 0
+              maximum: 10
+            knowledge:
+              type: number
+              minimum: 0
+              maximum: 10
+
+    CommitteeMember:
+      type: object
+      properties:
+        professor:
+          type: string
+          description: ID του καθηγητή μέλους της τριμελούς
+        status:
+          type: string
+          enum: ["pending", "accepted", "rejected"]
+          default: "pending"
+
     Theses:
       type: object
+      required:
+        - title
+        - professor
       properties:
         _id:
           type: string
@@ -2063,42 +2632,90 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, active, under_review, completed, cancelled]
+          enum: ["pending", "active", "under_review", "completed", "cancelled"]
+          default: "pending"
         assignedDate:
           type: string
           format: date-time
         professor:
           type: string
+          description: ID του επιβλέποντα καθηγητή
+        gradingOpen:
+          type: boolean
+          default: false
         student:
           type: string
+          nullable: true
         ap_number:
-          type: string
-          description: Αριθμός Γενικής Συνέλευσης
-          example: "15"
+          type: number
         ap_year:
-          type: string
-          description: Έτος Γενικής Συνέλευσης
-          example: "2024"
+          type: number
         cancel_reason:
           type: string
-          description: Λόγος ακύρωσης ανάθεσης
-          example: "Κατόπιν αίτησης φοιτητή"
-        grade:
-          type: number
-          format: float
-          description: Βαθμός διπλωματικής
-          example: 8.5
+        grades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grade'
         nimertis_link:
           type: string
-          format: uri
-          description: Σύνδεσμος προς το αποθετήριο Νημερτής
-          example: "https://nemertes.lis.upatras.gr/jspui/handle/10889/12345"
-        createdAt:
+        committee:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommitteeMember'
+        attachment:
+          type: string
+        draftFile:
+          type: string
+        finalGrade:
+          type: number
+          description: Τελικός μέσος όρος βαθμού από όλα τα μέλη της τριμελούς και τον επιβλέποντα
+        extraLinks:
+          type: array
+          items:
+            type: string
+        examDate:
           type: string
           format: date-time
-        updatedAt:
+        examMode:
           type: string
-          format: date-time
+          enum: ["in_person", "online"]
+        examLocation:
+          type: string
+      example:
+        _id: "64f8b1a0c1234abc56789012"
+        title: "Σχεδίαση και Ανάπτυξη Web App"
+        description: "Διπλωματική εργασία για το ΤΜΗΥΠ"
+        status: "under_review"
+        assignedDate: "2025-08-26T12:00:00Z"
+        professor: "64f8a0b1c1234abc56789001"
+        gradingOpen: true
+        student: "64f8c1d2c1234abc56789009"
+        ap_number: 123
+        ap_year: 2025
+        cancel_reason: null
+        grades:
+          - professor: "64f8a0b1c1234abc56789001"
+            criteria:
+              originality: 8
+              methodology: 7
+              presentation: 9
+              knowledge: 8
+            total: 8
+        nimertis_link: "https://example.com/nimertis"
+        committee:
+          - professor: "64f8a0b1c1234abc56789002"
+            status: "accepted"
+          - professor: "64f8a0b1c1234abc56789003"
+            status: "accepted"
+        attachment: "https://example.com/attachment.pdf"
+        draftFile: "https://example.com/draft.pdf"
+        finalGrade: 8.33
+        extraLinks:
+          - "https://example.com/resource1"
+          - "https://example.com/resource2"
+        examDate: "2025-09-10T10:00:00Z"
+        examMode: "online"
+        examLocation: "Zoom"
 
     CreateThesesRequest:
       type: object
