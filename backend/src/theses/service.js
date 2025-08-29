@@ -330,7 +330,9 @@ const unassignThesisFromStudent = async (thesesId) => {
     err.status = 403;
     throw err;
   }
-
+  if (theses.status !== "pending") {
+    throw new Error("Can only unassign theses with status 'pending'");
+  }
   theses.student=null;
   theses.status="pending";
   await theses.save();
@@ -356,7 +358,9 @@ const addNotes = async (thesesId,professorId,text ) => {
     err.status = 403;
     throw err;
   }
-
+  if (theses.status !== "active" && theses.status !== "under review") {
+    throw new Error("Can only add notes to theses with status 'active' or 'under review'");
+  }
   const newNote = {
     text,
     professor: professorId,
@@ -396,6 +400,52 @@ const viewMyNotes = async (thesesId,professorId) => {
     date: note.createdAt
   }));
 };
+
+const cancelThesesByProfessor = async(thesisid,professorId,apNumber,apYear) => {
+  const theses = await Theses.findById(thesisid);
+  if (!theses) {
+    throw new Error("Thesis not found");
+  }
+
+  
+
+  if (theses.professor.toString() !== professorId) {
+    throw new Error("Only the supervising professor can cancel this thesis");
+  }
+  if (theses.status!== "active") {
+    throw new Error("Only active theses can be canceled by the professor");
+  }
+  const twoYears = new Date(theses.assignedDate);
+  twoYears.setFullYear(twoYears.getFullYear() + 2);
+  if (new Date() < twoYears) {
+    throw new Error("Thesis can only be canceled after 2 years from the assigned date");
+  }
+  theses.status = "cancelled";
+  theses.cancel_reason = 'Απο διδάσκοντα';
+  theses.ap_number = apNumber;
+  theses.ap_year = apYear;
+  await theses.save();
+}
+
+const changeToUnderReview = async(thesesId,professorId) => {
+  const theses = await Theses.findById(thesesId);
+  const professor = await Professor.findById(professorId);
+  if (!theses) {
+    throw new Error("Thesis not found");
+  }
+
+  if (theses.professor.toString() !== professorId) {
+    throw new Error("Only the supervising professor can change the status to under review");
+  };
+  if(theses.status === "under_review"){
+    throw new Error("Thesis is already under review");
+  }
+  if (theses.status !== "active") {
+    throw new Error("Thesis status must be 'active' to change to 'under review'");
+  };
+  theses.status = "under_review";
+  await theses.save();
+}
 export default {
   createTheses,
   getAllTheses,
@@ -415,6 +465,8 @@ export default {
   getInvitedProfessors,
   unassignThesisFromStudent,
   addNotes,
-  viewMyNotes
+  viewMyNotes,
+  cancelThesesByProfessor,
+  changeToUnderReview
 };
    

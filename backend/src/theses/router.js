@@ -133,6 +133,20 @@ router.patch(
   thesesController.unassignThesisFromStudent
 );
 
+router.patch(
+  "/:id/cancel-by-professor",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.cancelThesesByProfessorcontroller
+);
+
+router.patch(
+  "/:id/under-review",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.changeToUnderReviewcontroller
+);
+
 router.post(
   '/:id/notes',
   authenticateToken,

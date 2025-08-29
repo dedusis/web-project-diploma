@@ -1097,6 +1097,125 @@ paths:
           description: Thesis not found or not assigned to any student
         "500":
           description: Internal server error
+  /theses/{id}/cancel-by-professor:
+    patch:
+      summary: Cancel a thesis assignment (supervisor only)
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      description: >
+        Επιβλέπων/ουσα Διδάσκων μπορεί να ακυρώσει ανάθεση διπλωματικής, αφού έχουν
+        παρέλθει 2 έτη από την οριστική ανάθεση. Καταχωρείται αριθμός & έτος ΓΣ,
+        και ο λόγος ακύρωσης τίθεται αυτόματα σε "από Διδάσκοντα".
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The unique ID of the thesis"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ap_number
+                - ap_year
+              properties:
+                ap_number:
+                  type: integer
+                  description: "Αριθμός Γενικής Συνέλευσης"
+                ap_year:
+                  type: integer
+                  description: "Έτος Γενικής Συνέλευσης"
+      responses:
+        "200":
+          description: Thesis cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  thesis:
+                    $ref: "#/components/schemas/Theses"
+        "403":
+          description: Unauthorized or conditions not met
+        "404":
+          description: Thesis not found
+  /theses/{id}/under-review:
+    patch:
+      summary: Change thesis status to "under review"
+      description: >
+        Επιτρέπει στον επιβλέποντα Καθηγητή να αλλάξει το status μίας διπλωματικής εργασίας σε "under review".
+        Μόνο ο supervising professor έχει το δικαίωμα να εκτελέσει αυτή τη λειτουργία.
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the thesis to update
+          schema:
+            type: string
+            example: 68a376ee58fc7eb01d69ef60
+      responses:
+        "200":
+          description: Thesis status changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Thesis status updated to under review
+                  thesis:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 68a376ee58fc7eb01d69ef60
+                      status:
+                        type: string
+                        example: under_review
+        "403":
+          description: Only the supervising professor can update the status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Only the supervising professor can change the status to under review
+        "404":
+          description: Thesis not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Thesis not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error
+
   /theses/{id}/notes:
     get:
       summary: View professor's notes for a thesis

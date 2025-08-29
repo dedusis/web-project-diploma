@@ -224,6 +224,29 @@ const viewMyNotes = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+const cancelThesesByProfessorcontroller = async (req, res) => {
+  try {
+    const thesesId = req.params.id;
+    const professorId = req.user.id;
+    const {apNumber, apYear} = req.body;
+    const updatedTheses = await thesesService.cancelThesesByProfessor(thesesId, professorId,apNumber,apYear);
+    res.json({ message: 'Thesis canceled successfully'});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const changeToUnderReviewcontroller = async(req,res) => {
+  try{
+    const thesesId=req.params.id;
+    const professorId=req.user.id;
+    const updatedTheses= await thesesService.changeToUnderReview(thesesId,professorId);
+    res.json({message:'Thesis status changed to under review'});
+  } catch(err){
+    res.status(500).json({error:err.message});
+  }
+};
 export default {
   createThesesController,
   getAllThesesController,
@@ -243,5 +266,7 @@ export default {
   getInvitedProfessorsController,
   unassignThesisFromStudent,
   addNotesController,
-  viewMyNotes
+  viewMyNotes,
+  cancelThesesByProfessorcontroller,
+  changeToUnderReviewcontroller
 };

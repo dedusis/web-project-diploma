@@ -18,6 +18,7 @@ const noteschema = new mongoose.Schema({
   }
 });
 
+
 const thesesSchema = new mongoose.Schema(
   {
     title: {
@@ -72,6 +73,7 @@ const thesesSchema = new mongoose.Schema(
     nimertis_link: {
       type: String 
     },
+    
     committee: [{
       professor: { type: mongoose.Schema.Types.ObjectId, ref: "Professor" },
       status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
