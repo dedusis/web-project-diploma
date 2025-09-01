@@ -12,6 +12,13 @@ router.post(
   authorizeRoles('professor', 'secretary'),
   thesesController.createThesesController
 );
+//export csv or json theses
+router.get(
+  '/export',
+  authenticateToken,
+  authorizeRoles('secretary', 'professor'),
+  exportThesesController
+);
 
 // Show professor invitations
 router.get(
@@ -233,10 +240,5 @@ router.get(
   authorizeRoles('professor'),
   thesesController.viewMyNotes
 );
-router.get(
-  '/export',
-  authenticateToken,
-  authorizeRoles('secretary'),
-  exportThesesController
-);
+
 export default router;

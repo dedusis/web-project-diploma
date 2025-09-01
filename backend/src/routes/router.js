@@ -15,6 +15,6 @@ router.use('/student', studentRouter);
 router.use('/auth', authRouter);
 router.use('/theses', thesesRouter);
 router.use('/import', importRouter);
-router.use('/export', exportRouter);
+router.use('/theses', exportRouter);
 
 export default router;
