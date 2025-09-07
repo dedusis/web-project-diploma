@@ -2,15 +2,15 @@ import express from 'express';
 import thesesController from './controller.js';
 import { authenticateToken, authorizeRoles } from '../auth/middleware.js';
 import { exportThesesController } from '../export/controller.js';
-
+import multer from 'multer';
 const router = express.Router();
+const upload = multer({dest:"uploads/",})
 
-// Create theses (professor ή secretary)
-router.post(
-  '/',
+router.get(
+  '/available',
   authenticateToken,
-  authorizeRoles('professor', 'secretary'),
-  thesesController.createThesesController
+  authorizeRoles("professor"),
+  thesesController.showProfessorAvailableThesesController
 );
 //export csv or json theses
 router.get(
@@ -20,12 +20,19 @@ router.get(
   exportThesesController
 );
 
-// Show professor invitations
 router.get(
   "/professor/invitations",
   authenticateToken,
   authorizeRoles("professor"),
   thesesController.showProfessorInvitationsController
+);
+// Create theses (professor ή secretary)
+router.post(
+  '/',
+  authenticateToken,
+  authorizeRoles('professor', 'secretary'),
+  upload.single("pdf"),
+  thesesController.createThesesController
 );
 
 // Get all theses (logged in users)
@@ -50,6 +57,8 @@ router.get(
   authorizeRoles('professor','secretary'), 
   thesesController.showProfessorThesesController
 );
+
+
 
 // Get student myThesis
 router.get(

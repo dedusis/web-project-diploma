@@ -14,9 +14,9 @@ form.addEventListener("submit",async(e) => {
     localStorage.setItem("token", authToken);
     const me = await getProfile(authToken);
     // Redirect ανά ρόλο
-    if (me.role === "student") location.href = "student.html";
-    else if (me.role === "professor") location.href = "professor.html";
-    else if (me.role === "secretary") location.href = "secretary.html";
+    if (me.role === "student") location.href = "student/student.html";
+    else if (me.role === "professor") location.href ="professor/professor1.html";
+    else if (me.role === "secretary") location.href = "secretary/secretary.html";
     else alert("Σύνδεση χωρίς γνωστό ρόλο: " + (me.role ?? "—"));
     } catch (err) {
     alert("Σφάλμα login: " + (err?.error || err?.message || JSON.stringify(err)));

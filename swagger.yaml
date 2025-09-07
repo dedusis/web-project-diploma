@@ -773,7 +773,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateThesesRequest'
       responses:
@@ -2070,7 +2070,28 @@ paths:
                 $ref: '#/components/schemas/Theses'
         '403':
           description: Not authorized
-
+  /theses/available:
+    get:
+      summary: Λίστα διαθέσιμων θεμάτων προς ανάθεση από τον καθηγητή
+      tags:
+        - Theses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Επιτυχής επιστροφή λίστας θεμάτων
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Thesis'
+        '404':
+          description: Δεν υπάρχει θέμα προς ανάθεση
+        '401':
+          description: Μη εξουσιοδοτημένη πρόσβαση
+        '500':
+          description: Εσωτερικό σφάλμα
   /theses/{id}/cancel:
     patch:
       summary: Cancel thesis assignment (by Secretary)
@@ -2721,14 +2742,17 @@ components:
       type: object
       required:
         - title
-        - professor
       properties:
         title:
           type: string
         description:
           type: string
-        professor:
+        pdf:
           type: string
+          format: binary
+          contentMediaType: application/pdf
+
+        
         
 
     UpdateThesesRequest:

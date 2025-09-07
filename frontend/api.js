@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3000"
+const API_BASE = '';
 function ajax(method, url, data, headers = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

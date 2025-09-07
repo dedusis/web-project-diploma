@@ -3,11 +3,25 @@ import Student from "../student/model.js";
 import Professor from "../professor/model.js";
 import mongoose from "mongoose";
 
-const createTheses = async (data) => {
-  const theses = new Theses(data);
+const createTheses = async (professorId,data,filePath) => {
+  const theses = new Theses({
+    professor:professorId,
+    description:data.description,
+    title:data.title,
+    attachment:filePath || null
+  });
   return await theses.save();
 };
-
+const showProfessorAvailableTheses = async(professorId)=>{
+  const theses =await Theses.find({
+    professor: professorId,
+    student: null
+  }).select("title description status createdAt");
+  if (!theses || theses.length === 0) {
+    throw new Error("Δεν υπάρχει θέμα προς ανάθεση.");
+  }
+  return theses;
+}
 const getThesesById = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid thesis ID");
@@ -730,6 +744,7 @@ export default {
   addNotes,
   viewMyNotes,
   cancelThesesByProfessor,
-  changeToUnderReview
+  changeToUnderReview,
+  showProfessorAvailableTheses
 };
    

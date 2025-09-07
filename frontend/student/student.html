@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Φοιτητής | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="student.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <div class="muted" id="stu-username">—</div>
+      <h2 id="stu-title">Πίνακας Φοιτητή</h2>
+    </div>
+    <div class="right">
+      <button id="refreshBtn" title="Ανανέωση">↻</button>
+      <button id="logoutBtn" class="danger">Αποσύνδεση</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Προφίλ -->
+    <section class="card">
+      <h3>Προφίλ</h3>
+      <div class="row"><b>Όνομα:</b> <span id="name">—</span></div>
+      <div class="row"><b>Username:</b> <span id="username">—</span></div>
+      <div class="row"><b>AM:</b> <span id="am">—</span></div>
+      <div class="row"><b>Email:</b> <span id="email">—</span></div>
+    </section>
+
+    <!-- Η διπλωματική μου -->
+    <section class="card">
+      <div class="header-flex">
+        <h3>Η διπλωματική μου</h3>
+        <button id="loadThesis" class="primary">Φόρτωση</button>
+      </div>
+      <div id="thesis" class="muted">—</div>
+    </section>
+
+    <!-- Upload τελικού PDF (προαιρετικά αν έχεις endpoint) -->
+    <section class="card">
+      <h3>Ανέβασμα Τελικού PDF</h3>
+      <form id="uploadForm" class="grid">
+        <input type="file" id="pdfFile" accept="application/pdf" />
+        <div class="actions">
+          <button class="primary" type="submit">Upload</button>
+          <span class="muted" id="uploadMsg"></span>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="student.js"></script>
+</body>
+</html>

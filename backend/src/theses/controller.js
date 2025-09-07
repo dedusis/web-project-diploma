@@ -3,7 +3,9 @@ import thesesService from "./service.js";
 
 const createThesesController = async (req, res) => {
   try {
-    const theses = await thesesService.createTheses(req.body);
+    const professorId=req.user.id;
+    const filePath=req.file ? req.file.path :null;
+    const theses = await thesesService.createTheses(professorId,req.body,filePath);
     res.status(201).json(theses);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -147,6 +149,18 @@ const respondInvitationController = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+const showProfessorAvailableThesesController = async(req,res) => {
+  try {
+      const theses = await thesesService.showProfessorAvailableTheses(req.user.id);
+      res.json(theses);
+    }
+    catch (err) {
+      if (err.message === 'Δεν υπάρχει θέμα προς ανάθεση.') {
+        return res.status(404).json({ error: err.message });
+      }
+      res.status(500).json({ error: err.message });
+    }
+}
 const showProfessorThesesController = async (req, res) => {
     try {
       const theses = await thesesService.showProfessorTheses(req.user.id);
@@ -418,5 +432,6 @@ export default {
   getPraktikoController,
   setNimertisLinkController,
   getCompletedThesisController,
-  getAllThesesController
+  getAllThesesController,
+  showProfessorAvailableThesesController
 };
