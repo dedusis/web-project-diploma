@@ -73,22 +73,22 @@ const updateTheses = async (id, updates) => {
 const deleteTheses = async (id) => {
   return await Theses.findByIdAndDelete(id);
 };
-
-const assignThesesToStudent = async (thesesId, studentId) => {
-
+const getStudentIdByStudentNumber = async (studentNumber) => {
+  const student = await Student.findOne({ student_number: studentNumber }).select('_id');
+  if (!student) {
+    throw new Error("Student not found with the given student number");
+  }
+  return student._id;
+};
+const assignThesesToStudent = async (thesesId, studentnumber) => {
+  const studentId = await getStudentIdByStudentNumber(studentnumber);
   const theses = await Theses.findById(thesesId);
   if (!theses) {
     throw new Error("Thesis not found");
   }
-
-  const student = await Student.findById(studentId);
-  if (!student) {
-    throw new Error("Student not found");
-  }
-
   const alreadyAssigned = await Theses.findOne({ student: studentId });
   if (alreadyAssigned) {
-    throw new Error("This student already has an assigned thesis");
+    throw new Error("Αυτός ο μαθητής εχει αναλάβει ήδη καποια διπλωματική!");
   }
   if (theses.student) {
     throw new Error("This thesis is already assigned to a student");

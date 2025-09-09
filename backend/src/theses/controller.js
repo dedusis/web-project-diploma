@@ -63,9 +63,10 @@ const deleteThesesController = async (req, res) => {
 
 const assignThesesController = async (req, res) => {
     const thesesId = req.params.id; 
-    const { studentId } = req.body;
+    const { student_number } = req.body;
+    console.log("backend",student_number);
     try {
-        const updatedTheses = await thesesService.assignThesesToStudent(thesesId, studentId);
+        const updatedTheses = await thesesService.assignThesesToStudent(thesesId, student_number);
         res.status(200).json(updatedTheses);
     } catch (err) {
     res.status(400).json({ error: err.message });

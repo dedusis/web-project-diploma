@@ -11,7 +11,7 @@
   <header>
   <div class="upper" id="prof-dashboard">Professor DashBoard</div>
   <div>   
-      <img src="/images/my.logo2.png"  onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
+      <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
   </div>
   
   <div class="header-right">
@@ -30,27 +30,19 @@
 
 <main class="content">
   <section class="box">
-    <div class="title">
-      <h2>Τα Θέματά μου</h2>
-    </div>
-    <div id="topicsList" class="topics">
-        <div class="actions">
-          <button class="buttons">Επεξεργασία</button>
-        </div>
-      </div>
-    </div>
+    <h2>Ανάθεση Θέματος</h2>
   </section>
-
   <section class="box">
-    <h2>Δημιουργία Νέου Θέματος</h2>
-    <form id="createTopic" class="grid">
-      <input type="text" id="title" placeholder="Τίτλος" class="create-input" required />
-      <textarea id="description" placeholder="Περιγραφή" class="create-input" required></textarea>
-      <input type="file" id="pdfFile" accept="application/pdf" />
-      <div class="actions">
-        <button type="submit" class="buttons">Δημιουργία</button>
-        <span id="createMsg" class="muted"></span>
-      </div>
-    </form>
+    <form id="assignForm">
+      <label for="thesisSelect">Επέλεξε Θέμα:</label>
+      <select id="thesisSelect" required></select>
   </section>
+  <section class="box">
+    <label for="studentNumber">Αριθμός Μητρώου Φοιτητή:</label>
+    <input type="number" id="studentNumber" required />
+  </section>
+    <button type="submit" class="buttons">Ανάθεση</button>
+  </form>
+</section>
 </main>
+

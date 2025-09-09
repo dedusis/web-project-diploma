@@ -3,7 +3,7 @@ const userDropdown = document.getElementById("userDropdown");
 const topicsList = document.getElementById("topicsList");
 const createForm = document.getElementById("createTopic");
 const createMsg = document.getElementById("createMsg");
-
+const assignForm = document.getElementById("assignForm");
 
 // Διαχείριση dropdown χρήστη
 if (userButton && userDropdown) {
@@ -18,8 +18,9 @@ if (userButton && userDropdown) {
     }
   });
 }
-
+//φορτωση θεματων προς αναθεση
 async function loadTopics() {
+  if (!topicsList) return;
   try {
     const response = await fetch('http://localhost:3000/theses/available', {
       method: 'GET',
@@ -124,7 +125,7 @@ async function loadUserData() {
 }
 
 // Αποσύνδεση χρήστη
-const logoutButton = document.getElementById("logoutButton");
+const logoutButton = document.getElementById("logoutBtn");
 if (logoutButton) {
   logoutButton.addEventListener("click", () => {
     localStorage.removeItem("token");
@@ -158,10 +159,76 @@ if (userNameSpan && userEmailSpan) {
     userEmailSpan.textContent = "—";
   }
 }
+async function loadThesesDropdown() {
+  try {
+    const response = await fetch('http://localhost:3000/theses/available', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (response.ok) {
+      const theses = await response.json();
+      const thesisSelect = document.getElementById('thesisSelect');
+      thesisSelect.innerHTML = '<option value="">Επιλέξτε Θέμα</option>'; // Καθαρισμός και προσθήκη προεπιλεγμένης επιλογής
+
+      theses.forEach((thesis) => {
+        const option = document.createElement('option');
+        option.value = thesis._id;
+        option.textContent = thesis.title;
+        thesisSelect.appendChild(option);
+      });
+    } else {
+      console.error('Failed to fetch theses for dropdown:', response.statusText);
+    }
+  } catch (err) {
+    console.error('Error fetching theses for dropdown:', err);
+  }
+}      
+async function assignStudent(thesisId){
+    const studentNumber=document.getElementById("studentNumber").value;
+    try {
+      const response = await fetch(`http://localhost:3000/theses/${thesisId}/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ student_number: studentNumber }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        alert('Θέμα ανατέθηκε επιτυχώς!');
+        loadTopics(); // Επαναφόρτωση της λίστας θεμάτων
+        loadThesesDropdown();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Σφάλμα κατά την ανάθεση.');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Σφάλμα κατά τη σύνδεση με τον διακομιστή.');
+    }   
+}
+
+if(assignForm){
+  assignForm.addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const thesisId=document.getElementById("thesisSelect").value;
+    if(thesisId){
+      await assignStudent(thesisId);
+      assignForm.reset();
+    }else{
+      alert('Παρακαλώ επιλέξτε ένα θέμα.');
+    }
+  });
+} 
 
 // Φόρτωση θεμάτων κατά την εκκίνηση
 document.addEventListener('DOMContentLoaded', () => {
   loadTopics();
   loadUserData();
-  
+  loadThesesDropdown();
 });

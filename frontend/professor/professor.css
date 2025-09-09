@@ -102,6 +102,7 @@ button, input, textarea, select {
   height: 140px;
   width: auto;
   z-index: 10;
+  cursor: pointer;
 }
 
 .user-menu {
