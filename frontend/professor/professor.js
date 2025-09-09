@@ -226,9 +226,88 @@ if(assignForm){
   });
 } 
 
+async function loadThesesHistory() {
+  try {
+    // Παίρνουμε τα φίλτρα
+    const status = document.getElementById("statusFilter").value;
+    const role = document.getElementById("roleFilter").value;
+
+    // Φτιάχνουμε query string
+    const query = new URLSearchParams();
+    if (status) query.append("status", status);
+    if (role) query.append("role", role);
+
+    const response = await fetch(`http://localhost:3000/theses/professor/me?${query.toString()}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (response.ok) {
+      const theses = await response.json();
+
+      const container = document.querySelector("main");
+      // Καθαρίζουμε παλιές κάρτες (κρατάμε το header/filters)
+      const oldCards = container.querySelectorAll(".thesis-card");
+      oldCards.forEach(c => c.remove());
+
+      theses.forEach((thesis) => {
+        const thesisbox = document.createElement("div");
+        thesisbox.classList.add("thesis-card");
+        thesisbox.innerHTML = `
+          <h3>${thesis.title}</h3>
+          <p class="thesis-meta"><b>Φοιτητής:</b> ${thesis.student ? thesis.student.name + " " + thesis.student.surname : "—"}</p>
+          <p class="thesis-meta"><b>Κατάσταση:</b> ${thesis.status}</p>
+          <p class="thesis-meta"><b>Ρόλος:</b> ${thesis.role === "supervisor" ? "Επιβλέπων" : "Μέλος τριμελούς"}</p>
+          <button class="buttons" onclick="location.href='details.html?id=${thesis._id}'">Επιλογή</button>
+        `;
+        container.appendChild(thesisbox);
+      });
+    } else {
+      console.error("Failed to fetch theses history:", response.statusText);
+    }
+  } catch (err) {
+    console.error("Error fetching theses history:", err);
+  }
+}
+
+function exportTheses(format){
+  fetch(`http://localhost:3000/theses/export?format=${format}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) throw new Error("Export failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = format === "csv" ? "theses.csv" : "theses.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    })
+    .catch((err) => {
+      console.error("Export error:", err);
+      alert("Σφάλμα κατά την εξαγωγή.");
+    });
+}
+
+
 // Φόρτωση θεμάτων κατά την εκκίνηση
 document.addEventListener('DOMContentLoaded', () => {
   loadTopics();
   loadUserData();
   loadThesesDropdown();
+  loadThesesHistory();
+  document.getElementById("statusFilter").addEventListener("change", loadThesesHistory);
+  document.getElementById("roleFilter").addEventListener("change", loadThesesHistory);
+  document.getElementById("exportCsv").addEventListener("click", () => exportTheses("csv"));
+  document.getElementById("exportJson").addEventListener("click", () => exportTheses("json"));
+
 });
+

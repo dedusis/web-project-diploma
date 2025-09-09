@@ -164,7 +164,8 @@ const showProfessorAvailableThesesController = async(req,res) => {
 }
 const showProfessorThesesController = async (req, res) => {
     try {
-      const theses = await thesesService.showProfessorTheses(req.user.id);
+      const {status,role} = req.query;
+      const theses = await thesesService.showProfessorTheses(req.user.id,{status,role});
       res.json(theses);
     }
     catch (err) {

@@ -460,29 +460,51 @@ const getCompletedThesis = async (id) => {
   return thesis; 
 };
 
-const showProfessorTheses = async (professorId,filters={}) => {
-    const theses = await Theses.find({
-        $or:[
-        {professor: professorId},
-        { "committee.professor": professorId }
-        ]
-    })
-    .select("-notes -statusHistory -__v") 
-    .populate("student", "name surname student_number email")
-    if (!theses || theses.length === 0) {
-        throw new Error('No theses assigned to this professor');
-    }
-    
-    const query = {professor: professorId};
+const showProfessorTheses = async (professorId, filters = {}) => {
+  // Βρίσκουμε τις διπλωματικές που σχετίζονται με τον καθηγητή
+  const theses = await Theses.find({
+    $or: [
+      { professor: professorId },
+      { "committee.professor": professorId }
+    ]
+  })
+    .select("-notes -statusHistory -__v")
+    .populate("student", "name surname student_number email");
 
-    if(filters.status){
-        query.status = filters.status;
-    }
+  if (!theses || theses.length === 0) {
+    throw new Error("No theses assigned to this professor");
+  }
 
-    if (filters.role){
-        query.role = filters.role;
-    }
-    return theses;
+  const thesesWithRole = theses.map(thesis => {
+  let role = null;
+
+  if (
+    thesis.professor &&
+    thesis.professor._id &&
+    thesis.professor._id.toString() === professorId.toString()
+  ) {
+    role = "supervisor";
+  } else if (
+    thesis.committee &&
+    thesis.committee.some(inv => inv.professor.toString() === professorId.toString())
+  ) {
+    role = "committee";
+  }
+
+  return { ...thesis.toObject(), role };
+});
+
+  let filtered = thesesWithRole;
+
+  if (filters.status) {
+    filtered = filtered.filter(t => t.status === filters.status);
+  }
+
+  if (filters.role) {
+    filtered = filtered.filter(t => t.role === filters.role);
+  }
+
+  return filtered;
 };
 
 const showthesesdetails = async (thesesId,professorId = null) => {

@@ -56,7 +56,7 @@ main {
   background: #fff;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  box-shadow: 0 0px 30px rgba(0,0,0,.30);
 }
 
 button, input, textarea, select {
@@ -133,7 +133,7 @@ button, input, textarea, select {
   border-radius: 8px;
   padding: 10px;
   width: 220px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   z-index: 100;
 }
 
@@ -155,7 +155,7 @@ button, input, textarea, select {
   background: #fff;
   border-radius: 12px;
   padding: 100px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
   text-align: center;
   transition: transform 0.2s ease;
   font-size: 20px;
@@ -175,7 +175,7 @@ button, input, textarea, select {
   background: #fff;
   border-radius: 10px;
   padding: 12px 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
 }
 
 .topic-card h3 {
@@ -251,4 +251,50 @@ button, input, textarea, select {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+
+.thesis-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.30);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor:pointer
+}
+
+.thesis-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.thesis-card h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.thesis-meta {
+  font-size: 14px;
+  color: #555;
+  margin: 4px 0;
+}
+
+.thesis-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.export-buttons{
+  display:flex;
+  gap:10px
+}
+.filters{
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  gap: 20px;
 }

@@ -26,7 +26,47 @@
     </div>
     <button id="logoutBtn" class="logout">Αποσύνδεση</button>
   </div>
-</header>
-<body>
-    
+  </header>
 </body>
+<main>
+  
+    <h1>Ιστορικό Διπλωματικών</h1>
+    <header1 class="box">
+      <div class="filters">
+        <label>Κατάσταση:
+          <select id="statusFilter">
+            <option value="">Όλες</option>
+            <option value="pending">Υπό ανάθεση</option>
+            <option value="active">Ενεργή</option>
+            <option value="under_review">Υπό Εξέταση</option>
+            <option value="completed">Περατωμένη</option>
+            <option value="canceled">Ακυρωμένη</option>
+          </select>
+        </label>
+
+        <label>Ρόλος:
+          <select id="roleFilter">
+            <option value="">Όλοι</option>
+            <option value="supervisor">Επιβλέπων</option>
+            <option value="committee">Μέλος τριμελούς</option>
+          </select>
+        </label>
+        <div class="export-buttons">
+         <button class="buttons" id="exportCsv">Εξαγωγή σε CSV</button>
+          <button class="buttons" id="exportJson">Εξαγωγή σε JSON</button>
+        </div>
+      </div>
+    </header1>
+  
+
+  
+    <div onclick="location.href='details.html'" class=thesis-card>
+      <h3>Σύστημα Διαχείρισης Δεδομένων</h3>
+      <p class="thesis-meta"><b>Φοιτητής:</b> Μαρία Ιωάννου</p>
+      <p class="thesis-meta"><b>Κατάσταση:</b> Ενεργή</p>
+      <p class="thesis-meta"><b>Ρόλος:</b> Επιβλέπων</p>
+    </div>
+     
+    </section>
+  </main>
+  </html>
