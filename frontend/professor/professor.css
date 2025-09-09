@@ -298,3 +298,67 @@ button, input, textarea, select {
   align-items: center;
   gap: 20px;
 }
+
+#invitationsList {
+  display: flex;
+  flex-direction: column; 
+  gap: 16px;              
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.invitation-item {
+  background: #fff;
+  border: 1px solid #ddd;
+  
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  width: 100%;             /* να πιάνει όλο το πλάτος */
+}
+
+#countChart {
+  max-width: 400px;
+  margin: 0 auto; /* το κεντράρει */
+  
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 ίσες στήλες */
+  gap: 24px;
+  padding: 20px;
+  height: calc(100vh - 200px); /* γεμίζει σχεδόν όλη την οθόνη */
+  align-items: stretch; /* όλα ίδια ύψος */
+}
+
+.chart-box {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.charts canvas {
+  width: 100% !important;
+  max-width: 500px !important;
+  max-height: 500px !important; /* κρατάει χαμηλό ύψος */
+}
+
+
+.chart-message {
+  font-style: italic;
+  color: #666;
+  text-align: center;
+}
+
+
+
+
+

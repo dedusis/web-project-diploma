@@ -47,7 +47,10 @@ const thesesSchema = new mongoose.Schema(
     },
     assignedDate: {
       type: Date,
-      default: Date.now
+    },
+    completedDate: {
+      type: Date,
+      default:null
     },
     professor: {
       type: mongoose.Schema.Types.ObjectId,
@@ -97,13 +100,13 @@ const thesesSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    attachment: {
+    attachment: { 
       type: String 
     },
     draftFile: { 
       type: String 
     }, 
-    finalGrade: { type: Number },
+    finalGrade: { type: Number,default: null },
     extraLinks: [String],
     examDate: { type: Date },
     examMode: { type: String, enum: ["in_person", "online"] },

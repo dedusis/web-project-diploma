@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Καθηγητής | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="professor.css" />
+  <script type="module" src="professor.js"></script>
+</head>
+<body>
+  <header>
+  <div class="upper" id="prof-dashboard">Professor DashBoard</div>
+  <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
+  </div>
+  
+  <div class="header-right">
+    <div class="user-menu">
+      <button id="userButton" class="user-icon">👤</button>
+      <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+      </div>
+    </div>
+    <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+  </div>
+</header>
+
+<head>
+  <meta charset="utf-8">
+  <title>Στατιστικά Διδάσκοντα</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="professor-stats.js"></script>
+  <style>
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin: 20px 0;
+    }
+    @media (min-width: 900px) {
+      .charts { grid-template-columns: 1fr 1fr; }
+      #countChart { grid-column: 1 / -1; }
+    }
+    canvas { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center;">Στατιστικά Διδάσκοντα</h1>
+     <div class="charts">
+    <div class="chart-box">
+        <canvas id="timeChart"></canvas>
+    </div>
+    <div class="chart-box">
+     <canvas id="gradeChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <canvas id="countChart"></canvas>
+    </div>
+</div>
+
+</body>
+</html>

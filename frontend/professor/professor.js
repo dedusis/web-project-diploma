@@ -226,6 +226,31 @@ if(assignForm){
   });
 } 
 
+function exportTheses(format){
+  fetch(`http://localhost:3000/theses/export?format=${format}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) throw new Error("Export failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = format === "csv" ? "theses.csv" : "theses.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    })
+    .catch((err) => {
+      console.error("Export error:", err);
+      alert("Σφάλμα κατά την εξαγωγή.");
+    });
+}
+
 async function loadThesesHistory() {
   try {
     // Παίρνουμε τα φίλτρα
@@ -272,30 +297,175 @@ async function loadThesesHistory() {
   }
 }
 
-function exportTheses(format){
-  fetch(`http://localhost:3000/theses/export?format=${format}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  })
-    .then(async (response) => {
-      if (!response.ok) throw new Error("Export failed");
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = format === "csv" ? "theses.csv" : "theses.json";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    })
-    .catch((err) => {
-      console.error("Export error:", err);
-      alert("Σφάλμα κατά την εξαγωγή.");
+
+async function loadInvitations(){
+  try{
+    const response=await fetch('http://localhost:3000/theses/professor/invitations',{
+      method:'GET',
+      headers:{
+        Authorization:`Bearer ${localStorage.getItem('token')}`,
+  },
     });
+    if(response.ok){
+      const invitations=await response.json();    
+      const invitationsList=document.getElementById("invitationsList");
+      invitationsList.innerHTML='';
+      invitations.forEach((invitation)=>{
+        const listItem=document.createElement("li");
+        listItem.classList.add("invitation-item");
+        listItem.innerHTML=`
+          <p><b>Θέμα:</b>${invitation.title}</p>
+          <p><b>Περιγραφή:</b>${invitation.description || '—'}</p>
+          <p><b>Πρόταση από:</b>${invitation.studentName} ${invitation.studentSurname}</p>
+          <p><b>Όνομα Επιβλέποντα:</b> ${invitation.supervisorname} ${invitation.supervisorSurname}</p>
+          <div class="actions">
+            <button class="buttons" onclick="respondToInvitation('${invitation.thesisId}','accepted')">Αποδοχή</button>
+            <button class="buttons" onclick="respondToInvitation('${invitation.thesisId}','rejected')">Απόρριψη</button>
+          </div>
+        `;
+        invitationsList.appendChild(listItem);
+      });
+    }else{
+      console.error("Failed to fetch invitations:", response.statusText);
+    }  
+ }catch(err){
+    console.error("Error fetching invitations:", err);
+  }
+} 
+
+// απλό request + αφαίρεση του συγκεκριμένου <li>
+async function respondToInvitation(id, responseType) {
+  try {
+    const resp = await fetch(`http://localhost:3000/theses/${id}/respond`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ response: responseType }), // "accepted" | "rejected"
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    window.location.reload(); // Ανανέωση της σελίδας για να αφαιρεθεί η πρόσκληση
+   
+  } catch (e) {
+    console.error('respondInvitation error:', e);
+  }
 }
+
+async function loadProfessorStats() {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch('http://localhost:3000/theses/professor/me', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      console.error('Failed to fetch stats:', await res.text());
+      return;
+    }
+
+    const theses = await res.json();
+
+    const groups = { supervisor: [], committee: [] };
+    theses.forEach(t => {
+      const role = t.role === 'supervisor' ? 'supervisor' : 'committee';
+      groups[role].push(t);
+    });
+
+    const daysBetween = (a, b) => {
+      const d1 = new Date(a), d2 = new Date(b);
+      return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    };
+    const avg = arr => arr.length ? (arr.reduce((s, x) => s + x, 0) / arr.length) : 0;
+
+    
+    const avgDays = ['supervisor','committee'].map(role => {
+      const completed = groups[role].filter(t => t.status === 'completed' && t.assignedDate && t.completedDate);
+      const days = completed.map(t => daysBetween(t.assignedDate, t.completedDate));
+      return Number(avg(days).toFixed(1));
+
+    });
+
+   
+    const avgGrades = ['supervisor','committee'].map(role => {
+      const graded = groups[role].filter(t => t.status === 'completed' && typeof t.finalGrade === 'number');
+      const grades = graded.map(t => t.finalGrade);
+      return Number(avg(grades).toFixed(2));
+    });
+
+    
+    const counts = ['supervisor','committee'].map(role => groups[role].length);
+
+    
+    renderBar('timeChart', ['Επιβλέπων','Μέλος τριμελούς'], avgDays, 'Μ. Όρος Ημερών Περάτωσης');
+    renderBar('gradeChart', ['Επιβλέπων','Μέλος τριμελούς'], avgGrades, 'Μ. Όρος Τελικού Βαθμού');
+    renderDoughnut('countChart', ['Επιβλέπων','Μέλος τριμελούς'], counts, 'Πλήθος Διπλωματικών');
+  } catch (err) {
+    console.error('Error loading professor stats:', err);
+  }
+}
+
+function renderBar(canvasId, labels, data, title) {
+  const ctx = document.getElementById(canvasId);
+  if (ctx._chart) ctx._chart.destroy();
+
+  
+  if (data.every(v => v === 0)) {
+    ctx.style.display = "none"; 
+    const msg = document.createElement("p");
+    msg.textContent = "Δεν υπάρχουν δεδομένα για " + title;
+    msg.style.textAlign = "center";
+    msg.style.fontStyle = "italic";
+    ctx.parentNode.insertBefore(msg, ctx.nextSibling);
+    return;
+  } else {
+    ctx.style.display = "block"; 
+  }
+
+  ctx._chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: title,
+        data,
+        borderWidth: 1,
+        backgroundColor: ['#6366f1','#a855f7']
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { display: false }, title: { display: true, text: title } }
+    }
+  });
+}
+
+
+
+function renderDoughnut(canvasId, labels, data, title) {
+  const ctx = document.getElementById(canvasId);
+  if (ctx._chart) ctx._chart.destroy();
+  ctx._chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: ['#6366f1','#a855f7']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: title,font:{size:30,weight:'bold'} } },
+      
+      cutout: '35%' 
+    }
+  });
+}
+
+
+
 
 
 // Φόρτωση θεμάτων κατά την εκκίνηση
@@ -304,6 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadUserData();
   loadThesesDropdown();
   loadThesesHistory();
+  loadInvitations();
+  loadProfessorStats();
   document.getElementById("statusFilter").addEventListener("change", loadThesesHistory);
   document.getElementById("roleFilter").addEventListener("change", loadThesesHistory);
   document.getElementById("exportCsv").addEventListener("click", () => exportTheses("csv"));
@@ -311,3 +483,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+window.respondToInvitation = respondToInvitation;

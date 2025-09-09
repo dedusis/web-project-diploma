@@ -95,6 +95,7 @@ const assignThesesToStudent = async (thesesId, studentnumber) => {
   }
   theses.student = studentId;
   theses.status = "pending";
+  theses.assignedDate = new Date();
   await theses.save();
   return theses;
 };
@@ -143,6 +144,7 @@ const completeThesis = async (id) => {
   }
 
   thesis.status = "completed";
+  thesis.completedDate = new Date();
   await thesis.save();
   return thesis;
 };
@@ -150,7 +152,7 @@ const completeThesis = async (id) => {
 //function for get my thesis
 const getThesisByStudent = async (studentId) => {
   const thesis = await Theses.findOne({ student: studentId })
-    select("-notes")
+    .select("-notes")
     .populate("professor", "name surname email")
     .populate("student", "name surname student_number email");
 
@@ -549,7 +551,8 @@ const showthesesdetails = async (thesesId,professorId = null) => {
 const showProfessorInvitations = async (professorId) => {
   const theses = await Theses.find({ "committee.professor": professorId })
     .populate("student", "name surname student_number email")
-    .populate("committee.professor", "name surname email");
+    .populate("committee.professor", "name surname email")
+    .populate("professor", "name surname email");
 
   return theses.flatMap(thesis =>
     thesis.committee
@@ -557,6 +560,9 @@ const showProfessorInvitations = async (professorId) => {
       .map(inv => ({
         thesisId: thesis._id,
         title: thesis.title,
+        description: thesis.description,
+        supervisorname: thesis.professor.name,
+        supervisorSurname: thesis.professor.surname,
         studentName: thesis.student.name,
         studentSurname: thesis.student.surname,
         studentNumber: thesis.student.student_number,
