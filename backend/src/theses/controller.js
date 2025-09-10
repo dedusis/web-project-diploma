@@ -3,9 +3,14 @@ import thesesService from "./service.js";
 
 const createThesesController = async (req, res) => {
   try {
+     console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
     const professorId=req.user.id;
-    const filePath=req.file ? req.file.path :null;
-    const theses = await thesesService.createTheses(professorId,req.body,filePath);
+    const fileUrl = req.file ? `/uploads/${req.file.filename}` : null;    
+    const theses = await thesesService.createTheses(
+      professorId,
+      req.body,
+      fileUrl);
     res.status(201).json(theses);
   } catch (err) {
     res.status(400).json({ error: err.message });

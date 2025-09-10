@@ -513,6 +513,8 @@ const showthesesdetails = async (thesesId,professorId = null) => {
   const theses = await Theses.findById(thesesId)
       .populate('student', 'name surname student_number email')
       .populate('committee', 'name surname email')
+      .populate("professor", "name surname email") 
+      .populate({path: "committee.professor",select: "name surname email"})
       .lean()
       .exec();
 
@@ -530,24 +532,52 @@ const showthesesdetails = async (thesesId,professorId = null) => {
       throw err;
     }
   }
+  
   return {
-      id: theses._id,
-      title: theses.title,
-      description: theses.description,
-      status: theses.status,
-      statusHistory: theses.statusHistory,
-      supervisor: theses.professor,
-      student: theses.student
-          ? {
-              name: theses.student.name,
-              surname: theses.student.surname,
-              student_number: theses.student.student_number,
-              email: theses.student.email,
-            }
-          : null, 
-      committee: theses.committee || [], 
+    id: theses._id,
+    title: theses.title,
+    description: theses.description,
+    status: theses.status,
+    statusHistory: theses.statusHistory || [],
+    supervisor: theses.professor
+      ? {
+          id: theses.professor._id,
+          name: theses.professor.name,
+          surname: theses.professor.surname,
+          email: theses.professor.email,
+        }
+      : null,
+    student: theses.student
+      ? {
+          id: theses.student._id,
+          name: theses.student.name,
+          surname: theses.student.surname,
+          student_number: theses.student.student_number,
+          email: theses.student.email,
+        }
+      : null,
+    committee: theses.committee?.map(c => ({
+      id: c.professor?._id,
+      name: c.professor?.name || null,
+      surname: c.professor?.surname || null,
+      email: c.professor?.email || null,
+      status: c.status,
+      invitedAt: c.invitedAt,
+      acceptedAt: c.acceptedAt,
+      rejectedAt: c.rejectedAt
+    })) || [],
+    finalGrade: theses.finalGrade ?? null,
+    grades: theses.grades || [],
+    nimertis_link: theses.nimertis_link || null,
+    attachment: theses.attachment || null,
+    draftFile: theses.draftFile || null,
+    examDate: theses.examDate || null,
+    examMode: theses.examMode || null,
+    examLocation: theses.examLocation || null,
+    extraLinks: theses.extraLinks || [],
   };
 };
+
 const showProfessorInvitations = async (professorId) => {
   const theses = await Theses.find({ "committee.professor": professorId })
     .populate("student", "name surname student_number email")

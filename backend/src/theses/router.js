@@ -3,9 +3,20 @@ import thesesController from './controller.js';
 import { authenticateToken, authorizeRoles } from '../auth/middleware.js';
 import { exportThesesController } from '../export/controller.js';
 import multer from 'multer';
+import path from "path";
 const router = express.Router();
-const upload = multer({dest:"uploads/",})
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // εδώ πάνε όλα τα αρχεία
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname); // π.χ. .pdf
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + "-" + unique + ext);
+  },
+});
 
+const upload = multer({ storage });
 router.get(
   '/available',
   authenticateToken,
@@ -31,7 +42,7 @@ router.post(
   '/',
   authenticateToken,
   authorizeRoles('professor', 'secretary'),
-  upload.single("pdf"),
+  upload.single("pdfFile"),
   thesesController.createThesesController
 );
 

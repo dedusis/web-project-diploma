@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.resolve();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -31,6 +31,7 @@ mongoose.connect(process.env.MONGO_URL)
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "frontend")));
 app.use('/', appRouter);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 const swaggerDocs = YAML.load('./swagger.yaml');

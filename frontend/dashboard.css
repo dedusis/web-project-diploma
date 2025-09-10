@@ -412,13 +412,3 @@ button, input, textarea, select {
 }
 
 
-.thesis-list {
-  max-width: 900px;
-  margin: 24px auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  padding: 20px;
-}
-.thesis-list > .thesis-card + .thesis-card { margin-top: 16px; }
-.section-title { margin: 0 0 16px; font-size: 20px; font-weight: 700; }

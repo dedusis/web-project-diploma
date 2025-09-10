@@ -2,33 +2,32 @@
 <html lang="el">
 <head>
   <meta charset="utf-8" />
-  <title>Καθηγητής | Διπλωματικές</title>
+  <title>Kαθηγητής | Διπλωματικές</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="professor.css" />
+  <link rel="stylesheet" href="/dashboard.css" />
   <script type="module" src="professor.js"></script>
 </head>
 <body>
   <header>
-  <div class="upper" id="prof-dashboard">Professor DashBoard</div>
-  <div>   
+    <div class="upper" id="prof-dashboard">Professor Dashboard</div>
+    <div>   
       <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
-  </div>
-  
-  <div class="header-right">
-    <div class="user-menu">
-      <button id="userButton" class="user-icon">👤</button>
-      <div id="userDropdown" class="dropdown hidden">
+    </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
           <p><b>Όνομα:</b> <span id="name">—</span></p>
           <p><b>Username:</b> <span id="username">—</span></p>
           <p><b>Email:</b> <span id="email">—</span></p>
           <p><b>Τμήμα:</b> <span id="department">—</span></p>
+        </div>
       </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
     </div>
-    <button id="logoutBtn" class="logout">Αποσύνδεση</button>
-  </div>
-</header>
+  </header>
 
-<main class="dashboard">
+  <main class="dashboard">
     <div class="options-box">
       <h3>Δημιουργία / Προβολή Θεμάτων</h3>
       <p>Καταχώρησε νέο θέμα διπλωματικής ή δες τα θέματα σου.</p>
@@ -43,7 +42,7 @@
 
     <div class="options-box">
       <h3>Λίστα Διπλωματικών</h3>
-      <p>Προβολή όλου του ιστορικού διπλωματικών .</p>
+      <p>Προβολή όλου του ιστορικού διπλωματικών.</p>
       <button onclick="location.href='thesesHistory.html'" class="buttons">Μετάβαση</button>
     </div>
 
@@ -56,12 +55,8 @@
     <div class="options-box">
       <h3>Στατιστικά</h3>
       <p>Προβολή στατιστικών για χρόνους, βαθμούς και συμμετοχές.</p>
-      <button onclick="location.href='stats.html'"class="buttons">Μετάβαση</button>
+      <button onclick="location.href='stats.html'" class="buttons">Μετάβαση</button>
     </div>
   </main>
-<body>
-    
-</body>
-
 </body>
 </html>

@@ -12,6 +12,7 @@ form.addEventListener("submit",async(e) => {
     if (!authToken) return alert("Δεν επιστράφηκε token.");
 
     localStorage.setItem("token", authToken);
+    localStorage.setItem("username", username);
     const me = await getProfile(authToken);
     // Redirect ανά ρόλο
     if (me.role === "student") location.href = "student/student.html";

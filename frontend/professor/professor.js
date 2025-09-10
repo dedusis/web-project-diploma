@@ -132,33 +132,6 @@ if (logoutButton) {
     window.location.href = "../index.html"; // Ανακατεύθυνση στη σελίδα σύνδεσης
   });
 }
-
-// Προβολή δεδομένων χρήστη
-const userNameSpan = document.getElementById("userName");
-const userEmailSpan = document.getElementById("userEmail");
-
-if (userNameSpan && userEmailSpan) {
-  const token = localStorage.getItem("token");
-  if (token) {
-    fetch("http://localhost:3000/auth/me", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        userNameSpan.textContent = data.name || "—";
-        userEmailSpan.textContent = data.email || "—";
-      })
-      .catch((err) => {
-        console.error("Error fetching user data:", err);
-      });
-  } else {
-    userNameSpan.textContent = "—";
-    userEmailSpan.textContent = "—";
-  }
-}
 async function loadThesesDropdown() {
   try {
     const response = await fetch('http://localhost:3000/theses/available', {
@@ -286,7 +259,8 @@ async function loadThesesHistory() {
           <p class="thesis-meta"><b>Κατάσταση:</b> ${thesis.status}</p>
           <p class="thesis-meta"><b>Ρόλος:</b> ${thesis.role === "supervisor" ? "Επιβλέπων" : "Μέλος τριμελούς"}</p>
           <button class="buttons" onclick="location.href='details.html?id=${thesis._id}'">Επιλογή</button>
-        `;
+          <button class="buttons" onclick="location.href='manage.html?thesisId=${thesis._id}'">Διαχείρηση</button>
+          `;
         container.appendChild(thesisbox);
       });
     } else {
@@ -334,7 +308,8 @@ async function loadInvitations(){
   }
 } 
 
-// απλό request + αφαίρεση του συγκεκριμένου <li>
+
+
 async function respondToInvitation(id, responseType) {
   try {
     const resp = await fetch(`http://localhost:3000/theses/${id}/respond`, {
@@ -343,10 +318,10 @@ async function respondToInvitation(id, responseType) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ response: responseType }), // "accepted" | "rejected"
+      body: JSON.stringify({ response: responseType }), 
     });
     if (!resp.ok) throw new Error(await resp.text());
-    window.location.reload(); // Ανανέωση της σελίδας για να αφαιρεθεί η πρόσκληση
+    window.location.reload(); 
    
   } catch (e) {
     console.error('respondInvitation error:', e);
@@ -434,10 +409,16 @@ function renderBar(canvasId, labels, data, title) {
       }]
     },
     options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { display: false }, title: { display: true, text: title } }
-    }
+    responsive: true,
+    scales: {
+      y: { beginAtZero: true, ticks: { font: { size: 14 } } },
+      x: { ticks: { font: { size: 14 } } }
+    },
+    plugins: { 
+     legend: { display: false }, 
+      title: { display: true, text: title, font: { size: 20, weight: "bold" } }
+  }
+}
   });
 }
 
@@ -464,6 +445,92 @@ function renderDoughnut(canvasId, labels, data, title) {
   });
 }
 
+function fieldRow(label, value) {
+  return `<div class="field-row"><b>${label}:</b> <span>${value ?? "—"}</span></div>`;
+}
+
+async function loadThesisDetails() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("id");
+
+  if (!thesisId) {
+    document.getElementById("thesisDetails").innerHTML = "<p>Δεν βρέθηκαν δεδομένα.</p>";
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:3000/theses/professor/me/${thesisId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!response.ok) throw new Error(`Σφάλμα: ${response.status}`);
+
+    const thesis = await response.json();
+    const container = document.getElementById("thesisDetails");
+
+    container.innerHTML = `
+      <h2>${thesis.title}</h2>
+      ${fieldRow("Περιγραφή", thesis.description)}
+      ${fieldRow("Κατάσταση", thesis.status)}
+
+      <h3>Φοιτητής</h3>
+      ${fieldRow("Όνομα", thesis.student?.name)}
+      ${fieldRow("Επώνυμο", thesis.student?.surname)}
+      ${fieldRow("ΑΜ", thesis.student?.student_number)}
+      ${fieldRow("Email", thesis.student?.email)}
+
+      <h3>Επιβλέπων</h3>
+      ${fieldRow("Όνομα", thesis.supervisor?.name)}
+      ${fieldRow("Επώνυμο", thesis.supervisor?.surname)}
+      ${fieldRow("Email", thesis.supervisor?.email)}
+
+      <h3>Τριμελής Επιτροπή</h3>
+      ${thesis.committee.length > 0
+        ? thesis.committee.map(c => `
+            <div class="committee-member">
+              ${fieldRow("Όνομα", c.name)}
+              ${fieldRow("Επώνυμο", c.surname)}
+              ${fieldRow("Email", c.email)}
+              ${fieldRow("Κατάσταση", c.status)}
+            </div>
+          `).join("")
+        : fieldRow("Επιτροπή", null)}
+
+      <h3>Χρονολόγιο Καταστάσεων</h3>
+      ${thesis.statusHistory.length > 0
+        ? thesis.statusHistory.map(h => `
+            ${fieldRow("Κατάσταση", h.status)} 
+            ${fieldRow("Ημερομηνία", new Date(h.date).toLocaleString("el-GR"))}
+          `).join("")
+        : fieldRow("Καταστάσεις", null)}
+
+      <h3>Λοιπές Πληροφορίες</h3>
+      ${fieldRow("Τελικός Βαθμός", thesis.finalGrade)}
+      ${fieldRow("Αποθετήριο", thesis.nimertis_link ? `<a href="${thesis.nimertis_link}" target="_blank">${thesis.nimertis_link}</a>` : null)}
+      ${fieldRow("Τελικό Αρχείο", thesis.attachment ? `<a href="${thesis.attachment}" target="_blank">Λήψη</a>` : null)}
+      ${fieldRow("Προσχέδιο", thesis.draftFile ? `<a href="${thesis.draftFile}" target="_blank">Λήψη</a>` : null)}
+      ${fieldRow("Ημερομηνία Εξέτασης", thesis.examDate ? new Date(thesis.examDate).toLocaleString("el-GR") : null)}
+      ${fieldRow("Τρόπος Εξέτασης", thesis.examMode)}
+      ${fieldRow("Τοποθεσία Εξέτασης", thesis.examLocation)}
+    `;
+  } catch (err) {
+    console.error("Αποτυχία φόρτωσης διπλωματικής:", err);
+    document.getElementById("thesisDetails").innerHTML = "<p>Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("thesisDetails")) {
+    loadThesisDetails();
+  }
+});
+
+
+
 
 
 
@@ -476,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadThesesHistory();
   loadInvitations();
   loadProfessorStats();
+  loadThesisDetails();
   document.getElementById("statusFilter").addEventListener("change", loadThesesHistory);
   document.getElementById("roleFilter").addEventListener("change", loadThesesHistory);
   document.getElementById("exportCsv").addEventListener("click", () => exportTheses("csv"));

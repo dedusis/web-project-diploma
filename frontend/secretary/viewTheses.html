@@ -2,15 +2,15 @@
 <html lang="el">
 <head>
   <meta charset="utf-8" />
-  <title>Secretary | Διπλωματικές</title>
+  <title>Γραμματεία | Διπλωματικές</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/dashboard.css" />
   <script type="module" src="secretary.js"></script>
 </head>
 <body>
   <header>
-    <div class="upper" id="prof-dashboard">Secretary Dashboard</div>
-    <div>   
+    <div class="upper" id="prof-dashboard">Secretary DashBoard</div>
+    <div>
       <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
     </div>
     <div class="header-right">
@@ -27,19 +27,8 @@
     </div>
   </header>
 
-  <main class="dashboard">
-    <div class="options-box">
-      <h3> Προβολή Διπλωματικών Εργασιών</h3>
-      <p>Δες τις διπλωματικές εργασίες που είναι σε κατάσταση «Ενεργή» και «Υπό Εξέταση» .</p>
-      <button onclick="location.href='viewTheses.html'" class="buttons">Μετάβαση</button>
-    </div>
-
-    <div class="options-box">
-      <h3>Εισαγωγή δεδομένων</h3>
-      <p>Εισαγωγή αρχείου JSON με προσωπικές πληροφορίες των φοιτητών και διδασκόντων.</p>
-      <button onclick="location.href='assign.html'" class="buttons">Μετάβαση</button>
-    </div>
-
+  <main>
+    <div id="thesis-list" class="thesis-list"></div>
   </main>
 </body>
 </html>
