@@ -213,7 +213,7 @@ router.get(
 );
 
 router.get(
-  '/professor/:username/:id',
+  '/professor/:id',
   authenticateToken, 
   authorizeRoles('professor','secretary'), 
   thesesController.showThesesDetailsController

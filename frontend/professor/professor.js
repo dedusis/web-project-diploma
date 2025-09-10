@@ -459,7 +459,7 @@ async function loadThesisDetails() {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/theses/professor/me/${thesisId}`, {
+    const response = await fetch(`http://localhost:3000/theses/professor/${thesisId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -476,6 +476,8 @@ async function loadThesisDetails() {
       <h2>${thesis.title}</h2>
       ${fieldRow("Περιγραφή", thesis.description)}
       ${fieldRow("Κατάσταση", thesis.status)}
+      ${fieldRow("Αναρτημένο Αρχείο(Προεραιτικό)", thesis.attachment ? `<a href="${thesis.attachment}" target="_blank">Λήψη</a>` : null)}
+
 
       <h3>Φοιτητής</h3>
       ${fieldRow("Όνομα", thesis.student?.name)}
@@ -511,7 +513,6 @@ async function loadThesisDetails() {
       <h3>Λοιπές Πληροφορίες</h3>
       ${fieldRow("Τελικός Βαθμός", thesis.finalGrade)}
       ${fieldRow("Αποθετήριο", thesis.nimertis_link ? `<a href="${thesis.nimertis_link}" target="_blank">${thesis.nimertis_link}</a>` : null)}
-      ${fieldRow("Τελικό Αρχείο", thesis.attachment ? `<a href="${thesis.attachment}" target="_blank">Λήψη</a>` : null)}
       ${fieldRow("Προσχέδιο", thesis.draftFile ? `<a href="${thesis.draftFile}" target="_blank">Λήψη</a>` : null)}
       ${fieldRow("Ημερομηνία Εξέτασης", thesis.examDate ? new Date(thesis.examDate).toLocaleString("el-GR") : null)}
       ${fieldRow("Τρόπος Εξέτασης", thesis.examMode)}

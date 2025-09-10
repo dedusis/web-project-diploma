@@ -51,6 +51,7 @@ const getActiveAndUnderReviewTheses = async (status) => {
     }
   }
 
+  
 
   const theses = await Theses.find(query)
     .populate("professor", "name surname email")
@@ -509,7 +510,7 @@ const showProfessorTheses = async (professorId, filters = {}) => {
   return filtered;
 };
 
-const showthesesdetails = async (thesesId,professorId = null) => {
+const showthesesdetails = async (thesesId) => {
   const theses = await Theses.findById(thesesId)
       .populate('student', 'name surname student_number email')
       .populate('committee', 'name surname email')
@@ -521,17 +522,10 @@ const showthesesdetails = async (thesesId,professorId = null) => {
   if (!theses) {
       throw new Error('Thesis not found');
   }
-  if (professorId)
-  { const isAssigned =
-          theses.professor?._id.toString() === professorId ||
-          (theses.committee?.some(c => c.professor._id.toString() === professorId));
 
-    if (!isAssigned) {
-      const err = new Error('Unauthorized to view this thesis');
-      err.status = 403;
-      throw err;
-    }
-  }
+  const daysSinceAssignment = theses.assignedDate
+    ? Math.floor((Date.now() - new Date(theses.assignedDate)) / (1000 * 60 * 60 * 24))
+    : null;
   
   return {
     id: theses._id,
@@ -575,6 +569,7 @@ const showthesesdetails = async (thesesId,professorId = null) => {
     examMode: theses.examMode || null,
     examLocation: theses.examLocation || null,
     extraLinks: theses.extraLinks || [],
+    daysSinceAssignment
   };
 };
 

@@ -182,9 +182,9 @@ const showProfessorThesesController = async (req, res) => {
 };
 const showThesesDetailsController = async (req, res) => {
   try {
-    const professorId= req.user.id;
+    
     const thesesId= req.params.id;
-    const theses = await thesesService.showthesesdetails(thesesId,professorId);
+    const theses = await thesesService.showthesesdetails(thesesId);
     if(!theses) return res.status(404).json({ error: 'Theses not found' });
     res.json(theses);
   } catch (err) {

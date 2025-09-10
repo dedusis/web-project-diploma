@@ -412,3 +412,71 @@ button, input, textarea, select {
 }
 
 
+
+.secretary-dashboard {
+  display: flex;
+  align-items: flex-start; /* στοίχιση στην κορυφή */
+  gap: 20px;              /* απόσταση ανάμεσα στις στήλες */
+  padding: 20px;
+}
+
+.theses-section {
+  flex: 3; /* παίρνει περισσότερο χώρο */
+}
+
+.import-section {
+  flex: 1; /* στενή στήλη δεξιά */
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.layout {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Διπλωματικές αριστερά */
+#thesis-list {
+  flex: 2;               /* Πιο μεγάλο */
+  max-width: 70%;
+}
+
+.sidebar {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  padding: 20px;
+}
+
+
+
+.secretary-container {
+  display: flex;
+  justify-content: flex-start; /* τα φέρνει αριστερά */
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px 40px;
+}
+
+.secretary-container .thesis-list {
+  flex: 2;         /* μεγαλύτερο χώρο */
+  max-width: 800px; /* αύξησε όσο θες για να καλύπτει το κενό */
+}
+
+.secretary-container .sidebar {
+  flex: 1; 
+  max-width: 350px;
+}
+
+.insert-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 68px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.30);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
