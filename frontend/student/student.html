@@ -2,54 +2,40 @@
 <html lang="el">
 <head>
   <meta charset="utf-8" />
-  <title>Φοιτητής | Διπλωματικές</title>
+  <title>Kαθηγητής | Διπλωματικές</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="student.css" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="student.js"></script>
 </head>
 <body>
   <header>
-    <div>
-      <div class="muted" id="stu-username">—</div>
-      <h2 id="stu-title">Πίνακας Φοιτητή</h2>
+    <div class="upper" id="prof-dashboard">Student Dashboard</div>
+    <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='student.html'" alt="Logo" class="page-logo">
     </div>
-    <div class="right">
-      <button id="refreshBtn" title="Ανανέωση">↻</button>
-      <button id="logoutBtn" class="danger">Αποσύνδεση</button>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+          <p><button class="buttons" onclick="location.href='edit-profile.html'">Επεξεργασία Προφίλ</button></p>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
     </div>
   </header>
 
-  <main>
-    <!-- Προφίλ -->
-    <section class="card">
-      <h3>Προφίλ</h3>
-      <div class="row"><b>Όνομα:</b> <span id="name">—</span></div>
-      <div class="row"><b>Username:</b> <span id="username">—</span></div>
-      <div class="row"><b>AM:</b> <span id="am">—</span></div>
-      <div class="row"><b>Email:</b> <span id="email">—</span></div>
-    </section>
+<main class="student-dashboard">
+  <div class="student-box">
+    <h2>Διπλωματική Εργασία</h2>
+    <p class="subtitle">Προβολή Θέματος & Διαχείριση</p>
+    <p class="description">Δες όλες τις λεπτομέρειες για την πορεία της διπλωματικής σου.</p>
+    <button onclick="location.href='details.html'"        id="manageBtn" class="btn-primary">Μετάβαση</button>
+  </div>
+</main>
 
-    <!-- Η διπλωματική μου -->
-    <section class="card">
-      <div class="header-flex">
-        <h3>Η διπλωματική μου</h3>
-        <button id="loadThesis" class="primary">Φόρτωση</button>
-      </div>
-      <div id="thesis" class="muted">—</div>
-    </section>
-
-    <!-- Upload τελικού PDF (προαιρετικά αν έχεις endpoint) -->
-    <section class="card">
-      <h3>Ανέβασμα Τελικού PDF</h3>
-      <form id="uploadForm" class="grid">
-        <input type="file" id="pdfFile" accept="application/pdf" />
-        <div class="actions">
-          <button class="primary" type="submit">Upload</button>
-          <span class="muted" id="uploadMsg"></span>
-        </div>
-      </form>
-    </section>
-  </main>
-
-  <script type="module" src="student.js"></script>
 </body>
 </html>

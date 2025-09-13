@@ -106,11 +106,10 @@ const activateThesis = async (id, { ap_number, ap_year }) => {
   const thesis = await Theses.findById(id);
   if (!thesis) throw new Error("Thesis not found");
 
-  if (!thesis.readyForActivation) {
-    throw new Error("Thesis is not ready for activation. Committee not complete.");
+  if (!thesis.status==="active") {
+    throw new Error("Thesis is not active");
   }
 
-  thesis.status = "active";
   thesis.ap_number = ap_number;
   thesis.ap_year = ap_year;
   thesis.acceptedAt= new Date();
@@ -120,14 +119,14 @@ const activateThesis = async (id, { ap_number, ap_year }) => {
   return thesis;
 };
 
-const cancelThesis = async (id, { ap_number, ap_year, reason }) => {
+const cancelThesis = async (id, { cancel_ap_number, cancel_year}) => {
   return await Theses.findByIdAndUpdate(
     id,
     {
       status: "canceled",
-      ap_number,
-      ap_year,
-      cancel_reason: reason,
+      cancel_ap_number,
+      cancel_year,
+      cancel_reason: "Ακυρώθηκε απο Γραμματεία κατόπιν αιτήματος"
     },
     { new: true }
   );
@@ -155,6 +154,7 @@ const getThesisByStudent = async (studentId) => {
   const thesis = await Theses.findOne({ student: studentId })
     .select("-notes")
     .populate("professor", "name surname email")
+    .populate("committee.professor","name surname email")
     .populate("student", "name surname student_number email");
 
   if (!thesis) {
@@ -166,7 +166,12 @@ const getThesisByStudent = async (studentId) => {
     ? Math.floor((Date.now() - thesis.assignedDate) / (1000 * 60 * 60 * 24))
     : null;
 
-  return { ...thesis.toObject(), daysSinceAssignment };
+  const thesisObj = thesis.toObject();
+  thesisObj.committee = thesisObj.committee.filter(
+    (c) => c.status === "accepted" && c.professor
+  );
+
+  return { ...thesisObj, daysSinceAssignment };
 };
 
 //student invites professor
@@ -241,16 +246,15 @@ const respondInvitation = async (professorId, thesisId, response) => {
   ).length;
 
   if (acceptedCount >= 2) {
-    thesis.readyForActivation = true; 
+    thesis.status="active";
+    thesis.readyForActivation = false; 
     thesis.assignedDate = new Date();
     thesis.committee.forEach((inv) => {
       if (inv.status === "pending") {
         inv.status = "rejected";
       }
     });
-  } else {
-    thesis.readyForActivation = false; 
-  }
+  } 
 
 
   await thesis.save();
@@ -550,16 +554,18 @@ const showthesesdetails = async (thesesId) => {
           email: theses.student.email,
         }
       : null,
-    committee: theses.committee?.map(c => ({
-      id: c.professor?._id,
-      name: c.professor?.name || null,
-      surname: c.professor?.surname || null,
-      email: c.professor?.email || null,
-      status: c.status,
-      invitedAt: c.invitedAt,
-      acceptedAt: c.acceptedAt,
-      rejectedAt: c.rejectedAt
-    })) || [],
+    committee: theses.committee
+    ?.filter(c => c.status === "accepted") // <--- κρατάει μόνο τα accepted
+    .map(c => ({
+    id: c.professor?._id,
+    name: c.professor?.name || null,
+    surname: c.professor?.surname || null,
+    email: c.professor?.email || null,
+    status: c.status,
+    invitedAt: c.invitedAt,
+    acceptedAt: c.acceptedAt,
+    rejectedAt: c.rejectedAt
+  })) || [],
     finalGrade: theses.finalGrade ?? null,
     grades: theses.grades || [],
     nimertis_link: theses.nimertis_link || null,
@@ -569,7 +575,13 @@ const showthesesdetails = async (thesesId) => {
     examMode: theses.examMode || null,
     examLocation: theses.examLocation || null,
     extraLinks: theses.extraLinks || [],
-    daysSinceAssignment
+    daysSinceAssignment,
+    ap_number: theses.ap_number || null,
+    ap_year: theses.ap_year || null,
+    cancel_ap_number: theses.cancel_ap_number || null,
+    cancel_year: theses.cancel_year || null,
+    cancel_reason: theses.cancel_reason || null
+    
   };
 };
 

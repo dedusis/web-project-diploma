@@ -2,14 +2,14 @@
 <html lang="el">
 <head>
   <meta charset="utf-8" />
-  <title>Γραμματεία | Διπλωματικές</title>
+  <title>Φοιτητής | Διπλωματικές</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/dashboard.css" />
-  <script type="module" src="secretary.js"></script>
+  <script type="module" src="student.js"></script>
 </head>
 <body>
   <header>
-  <div class="upper" id="prof-dashboard">Secretary DashBoard</div>
+  <div class="upper" id="prof-dashboard">Student DashBoard</div>
   <div>   
       <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
   </div>
@@ -27,10 +27,25 @@
     <button id="logoutBtn" class="logout">Αποσύνδεση</button>
   </div>
 </header>
-</body>
-<main>
-    <h1 class=box style="text-align: center;">Λεπτομέρειες Διπλωματικής Εργασίας</h1>
-    <div class="details-container">
-    <div id="thesisDetails"></div>
-    </div>
-</main>> 
+
+<main id="profile-form">
+    <h2 style="font-size:25px ">Στοιχεία Επικοινωνίας</h2>
+
+    <label>Ταχυδρομική Διεύθυνση:
+        <input type="text" id="street">
+    </label>
+
+    <label>Email Επικοινωνίας:
+        <input type="text" id="form-email"> 
+     </label>
+
+    <label>Κινητό Τηλέφωνο:
+        <input type="email" id="form-phonenumber">
+    </label>
+
+    <label>Σταθερό Τηλέφωνο:
+        <input type="text" id="form-landline">
+    </label>
+
+    <button class="buttons" onclick="updateProfile()">Αποθήκευση Αλλαγών</button>
+</main>

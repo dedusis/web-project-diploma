@@ -517,6 +517,20 @@ async function loadThesisDetails() {
       ${fieldRow("Ημερομηνία Εξέτασης", thesis.examDate ? new Date(thesis.examDate).toLocaleString("el-GR") : null)}
       ${fieldRow("Τρόπος Εξέτασης", thesis.examMode)}
       ${fieldRow("Τοποθεσία Εξέτασης", thesis.examLocation)}
+
+       <h3>Αποφάσεις ΓΣ</h6>  
+      <div class="committee-member">  
+      <h4>Αποφάση Έγκρισης Θέματος από ΓΣ</h4>
+      ${fieldRow("Αριθμός Πράξης", thesis.ap_number)}
+      ${fieldRow("Έτος Πράξης", thesis.ap_year)}
+      </div>
+
+      <div class="committee-member">
+      <h4>Απόφαση Ακύρωσης απο ΓΣ</h4>
+      ${fieldRow("Αιτία Ακύρωσης", thesis.cancel_reason)}
+      ${fieldRow("Αριθμός Πράξης Ακύρωσης", thesis.cancel_ap_number)}
+      ${fieldRow("Έτος Πράξης Ακύρωσης", thesis.cancel_year)}
+      </div>
     `;
   } catch (err) {
     console.error("Αποτυχία φόρτωσης διπλωματικής:", err);

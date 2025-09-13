@@ -82,6 +82,12 @@ const thesesSchema = new mongoose.Schema(
     cancel_reason: {
       type: String 
     },
+    cancel_ap_number: {
+      type: Number 
+    },
+    cancel_year:{
+      type: Number
+    },
     grades: [gradeSchema],
     nimertis_link: {
       type: String 

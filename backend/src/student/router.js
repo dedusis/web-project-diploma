@@ -14,7 +14,7 @@ router.get('/', authenticateToken, authorizeRoles('secretary'), studentControlle
 router.get('/:username', authenticateToken, authorizeRoles('secretary'), studentController.getStudentController);
 
 //Update user (secretary)
-router.put('/:username', authenticateToken, authorizeRoles('secretary'), studentController.updateStudentController);
+router.put('/:username', authenticateToken, authorizeRoles('secretary','student'), studentController.updateStudentController);
 
 //Delete user (secretary)
 router.delete('/:username', authenticateToken, authorizeRoles('secretary'), studentController.deleteStudentController);

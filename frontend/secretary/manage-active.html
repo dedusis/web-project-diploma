@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Secretary | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="secretary.js"></script>
+</head>
+<body>
+  <header>
+    <div class="upper" id="prof-dashboard">Secretary Dashboard</div>
+    <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
+    </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+    </div>
+  </header>
+ 
+<div class="title-1">Διαχείριση Ενεργής Διπλωματικής</div>  
+<div class="forms-container">
+  <form id="apForm" class="insert-card">
+    <h2 class="section-title">Καταχώρηση ΑΠ έγκρισης</h2>
+    <label for="gsNumber">Αριθμός ΓΣ</label>
+    <input type="text" id="gsNumber" name="gsNumber" required>
+
+    <label for="gsYear">Έτος ΓΣ</label>
+    <input type="number" id="gsYear" name="gsYear" required>
+
+    <button type="submit" class="buttons">Καταχώρηση</button>
+  </form>
+
+  <form id="cancelForm" class="insert-card">
+    <h2 class="section-title">Ακύρωση Ανάθεσης</h2>
+
+    <label for="cancelNumber">Αριθμός ΓΣ</label>
+    <input type="text" id="cancelNumber" name="cancelNumber" required>
+
+    <label for="cancelYear">Έτος ΓΣ</label>
+    <input type="number" id="cancelYear" name="cancelYear" required>
+
+    
+
+    <button type="submit" class="buttons">Ακύρωση</button>
+  </form>

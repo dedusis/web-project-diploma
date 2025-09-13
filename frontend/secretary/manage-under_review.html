@@ -2,35 +2,27 @@
 <html lang="el">
 <head>
   <meta charset="utf-8" />
-  <title>Γραμματεία | Διπλωματικές</title>
+  <title>Secretary | Διπλωματικές</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/dashboard.css" />
   <script type="module" src="secretary.js"></script>
 </head>
 <body>
   <header>
-  <div class="upper" id="prof-dashboard">Secretary DashBoard</div>
-  <div>   
+    <div class="upper" id="prof-dashboard">Secretary Dashboard</div>
+    <div>   
       <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
-  </div>
-  
-  <div class="header-right">
-    <div class="user-menu">
-      <button id="userButton" class="user-icon">👤</button>
-      <div id="userDropdown" class="dropdown hidden">
+    </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
           <p><b>Όνομα:</b> <span id="name">—</span></p>
           <p><b>Username:</b> <span id="username">—</span></p>
           <p><b>Email:</b> <span id="email">—</span></p>
           <p><b>Τμήμα:</b> <span id="department">—</span></p>
+        </div>
       </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
     </div>
-    <button id="logoutBtn" class="logout">Αποσύνδεση</button>
-  </div>
-</header>
-</body>
-<main>
-    <h1 class=box style="text-align: center;">Λεπτομέρειες Διπλωματικής Εργασίας</h1>
-    <div class="details-container">
-    <div id="thesisDetails"></div>
-    </div>
-</main>> 
+  </header>

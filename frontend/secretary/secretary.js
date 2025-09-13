@@ -71,13 +71,24 @@ async function loadActiveTheses() {
   theses.forEach(t => {
     const div = document.createElement("div");
     div.classList.add("thesis-card");
+    let managePage = "";
+    let manageButton = "";
+
+    if (t.status === "active") {
+     managePage = `manage-active.html?id=${t._id}`;
+     manageButton = `<button class="buttons" onclick="location.href='${managePage}'">Διαχείριση</button>`;
+    } else if (t.status === "under_review") {
+      managePage = `manage-under_review.html?id=${t._id}`;
+      manageButton =`<button class="buttons" onclick="completeThesis('${t._id}')">Ολοκλήρωση</button>`;
+    }
+
     div.innerHTML = `
       <h3>${t.title}</h3>
       <p><b>Περιγραφή:</b> ${t.description ?? "—"}</p>
       <p><b>Κατάσταση:</b> ${t.status}</p>
       <p><b>Φοιτητής:</b> ${t.student?.name ?? "—"} ${t.student?.surname ?? ""}</p>
       <p><b>Ημέρες από ανάθεση:</b> ${t.daysSinceAssignment ?? "—"}</p>
-      <button class="buttons" onclick="location.href='editThesis.html?id=${t._id}'">Διαχείρηση</button>
+      ${manageButton}
       <button class="buttons" onclick="location.href='details.html?id=${t._id}'">Λεπτομέρειες</button>
     `;
     container.appendChild(div);
@@ -194,6 +205,19 @@ async function loadThesisDetails() {
           `).join("")
         : fieldRow("Επιτροπή", null)}
 
+      <h3>Αποφάσεις ΓΣ</h6>  
+      <div class="committee-member">  
+      <h4>Αποφάση Έγκρισης Θέματος από ΓΣ</h4>
+      ${fieldRow("Αριθμός Πράξης", thesis.ap_number)}
+      ${fieldRow("Έτος Πράξης", thesis.ap_year)}
+      </div>
+
+      <div class="committee-member">
+      <h4>Απόφαση Ακύρωσης απο ΓΣ</h4>
+      ${fieldRow("Αιτία Ακύρωσης", thesis.cancel_reason)}
+      ${fieldRow("Αριθμός Πράξης Ακύρωσης", thesis.cancel_ap_number)}
+      ${fieldRow("Έτος Πράξης Ακύρωσης", thesis.cancel_year)}
+      </div>
       
        
       
@@ -203,10 +227,124 @@ async function loadThesisDetails() {
     document.getElementById("thesisDetails").innerHTML = "<p>Σφάλμα κατά τη φόρτωση λεπτομερειών.</p>";
   }
 }
+
+async function activateThesis() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const thesisId = urlParams.get("id");
+  if (!thesisId) return;
+
+  const form = document.getElementById("apForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const ap_number = document.getElementById("gsNumber").value.trim();
+    const ap_year = document.getElementById("gsYear").value.trim();
+
+    if (!ap_number || !ap_year) {
+      alert("Συμπλήρωσε όλα τα πεδία!");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Δεν υπάρχει token. Κάνε login ξανά.");
+
+      const res = await fetch(`http://localhost:3000/theses/${thesisId}/activate`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ ap_number, ap_year })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Σφάλμα ενεργοποίησης");
+
+      alert("✅ Διπλωματική ενεργοποιήθηκε!");
+    } catch (err) {
+      alert(`❌ Σφάλμα: ${err.message}`);
+    }
+  });
+}
+
+async function cancelThesis() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const thesisId = urlParams.get("id");
+  if (!thesisId) return;
+
+  const form = document.getElementById("cancelForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const cancel_ap_number = Number(document.getElementById("cancelNumber").value.trim());
+    const cancel_year = Number(document.getElementById("cancelYear").value.trim());
+
+    if (!cancel_ap_number || !cancel_year) {
+      alert("Συμπλήρωσε όλα τα πεδία!");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Δεν υπάρχει token. Κάνε login ξανά.");
+
+      const res = await fetch(`http://localhost:3000/theses/${thesisId}/cancel`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ cancel_ap_number, cancel_year })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Σφάλμα ακύρωσης");
+
+      alert(" Διπλωματική ακυρώθηκε!");
+    } catch (err) {
+      alert(` Σφάλμα: ${err.message}`);
+    }
+  });
+}
+ window.completeThesis=async function (id) {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`http://localhost:3000/theses/${id}/complete`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    if (!res.ok) {
+      let errorMessage = "Αποτυχία ολοκλήρωσης";
+      try {
+        const data = await res.json();
+        errorMessage = data.error || data.message || JSON.stringify(data);
+      } catch {
+        errorMessage = await res.text();
+      }
+      throw new Error(errorMessage);
+    }
+
+    alert("Η διπλωματική ολοκληρώθηκε!");
+    loadActiveTheses(); // ανανέωση λίστας
+  } catch (err) {
+    console.error("Σφάλμα API:", err);
+    alert("" + err.message);
+  }
+}
 // τρέχει όταν φορτώσει η σελίδα
 document.addEventListener('DOMContentLoaded', () => {
     loadUserData();
     loadActiveTheses();
     uploadJSON();
     loadThesisDetails();
+    cancelThesis();
+    activateThesis();
 });
