@@ -207,7 +207,8 @@ const showProfessorInvitationsController = async (req,res) => {
 const uploadDraftController = async (req, res) => {
   try {
     const studentId = req.user.id;
-    const { draftFile, extraLinks } = req.body;
+    const draftFile= req.file ? req.file.path : null;
+    const { extraLinks } = req.body;
 
     const updatedThesis = await thesesService.uploadDraft(studentId, { draftFile, extraLinks });
 
@@ -216,8 +217,7 @@ const uploadDraftController = async (req, res) => {
       thesis: updatedThesis
     });
   } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+    res.status(400).json({ message: "Η ανάρτηση απέτυχε: " + err.message });  }
 };
 
 // Student sets exam details

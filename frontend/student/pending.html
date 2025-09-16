@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Φοιτητής | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="student.js"></script>
+</head>
+<body>
+  <header>
+  <div class="upper" id="prof-dashboard">Student Dashboard</div>
+  <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='student.html'" alt="Logo" class="page-logo">
+  </div>
+  
+  <div class="header-right">
+    <div class="user-menu">
+      <button id="userButton" class="user-icon">👤</button>
+      <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+      </div>
+    </div>
+    <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+  </div>
+</header>
+</body>
+<main>
+  <!-- 🔹 Φόρμα για πρόσκληση καθηγητών -->
+  <section class="invite-section">
+    <h2>Πρόσκληση Μελών Τριμελούς</h2>
+    <form id="inviteForm">
+      <label for="emailsInput">Emails Καθηγητών (χωρισμένα με κόμμα):</label><br>
+      <input type="text" id="emailsInput" name="emailsInput" placeholder="prof1@example.com, prof2@example.com" required>
+      <button type="button" onclick="inviteProfessors()" class="buttons">Αποστολή Προσκλήσεων</button>
+    </form>
+    <p id="inviteMessage"></p>
+  </section>
+</main>

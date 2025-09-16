@@ -265,10 +265,6 @@ const uploadDraft = async (studentId, { draftFile, extraLinks }) => {
   const thesis = await Theses.findOne({ student: studentId });
   if (!thesis) throw new Error("No thesis found for this student");
 
-  if (thesis.status !== "active") {
-    throw new Error("Draft can only be uploaded when thesis is active");
-  }
-
   thesis.draftFile = draftFile || thesis.draftFile;
   thesis.extraLinks = extraLinks || thesis.extraLinks;
   thesis.status = "under_review"; 
@@ -393,9 +389,7 @@ const getPraktiko = async (studentId) => {
     .populate("student", "name surname email student_number");
 
   if (!thesis) throw new Error("No thesis found for this student");
-  if (thesis.status !== "completed") {
-    throw new Error("Praktiko is available only after thesis is completed");
-  }
+ 
 
   let html = `
     <html>
@@ -441,10 +435,6 @@ const setNimertisLink = async (studentId, { nimertis_link }) => {
   const thesis = await Theses.findOne({ student: studentId });
   if (!thesis) throw new Error("No thesis found for this student");
 
-  if (thesis.status !== "completed") {
-    throw new Error("You can only set the Nimertis link after completion");
-  }
-
   thesis.nimertis_link = nimertis_link;
   //thesis.status = "completed"; (gets completed automatically)
   await thesis.save();
@@ -468,7 +458,6 @@ const getCompletedThesis = async (id) => {
 };
 
 const showProfessorTheses = async (professorId, filters = {}) => {
-  // Βρίσκουμε τις διπλωματικές που σχετίζονται με τον καθηγητή
   const theses = await Theses.find({
     $or: [
       { professor: professorId },

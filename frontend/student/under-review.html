@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Φοιτητής | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="student.js"></script>
+</head>
+<body>
+  <header>
+  <div class="upper" id="prof-dashboard">Student Dashboard</div>
+  <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='student.html'" alt="Logo" class="page-logo">
+  </div>
+  
+  <div class="header-right">
+    <div class="user-menu">
+      <button id="userButton" class="user-icon">👤</button>
+      <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+      </div>
+    </div>
+    <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+  </div>
+</header>
+</body>
+
+<main class="exam-process">
+  <h1>Διαδικασία Εξέτασης Διπλωματικής</h1>
+
+  <!-- Πρόχειρο -->
+  <section class="card">
+    <h2>Ανάρτηση Πρόχειρου</h2>
+    <input type="file" id="draftUpload">
+    <input type="url" id="extraLinks" placeholder="Σύνδεσμοι (Google Drive, YouTube)">
+    <button class="buttons" onclick="uploadDraft()">Ανάρτηση</button>
+    <p id="draftMessage"></p>
+  </section>
+
+  <!-- Εξέταση -->
+  <section class="card">
+    <h2>Ημερομηνία & Ώρα Εξέτασης</h2>
+    <input type="datetime-local" id="examDate">
+    <select id="examMode">
+      <option value="in_person">Δια ζώσης</option>
+      <option value="online">Διαδικτυακά</option>
+    </select>
+    <input type="text" id="examInfo" placeholder="Αίθουσα ή Σύνδεσμος">
+    <button class="buttons" onclick="saveExamInfo()">Αποθήκευση</button>
+    <p id="examMessage"></p>
+  </section>
+
+  <!-- Πρακτικό -->
+  <section class="card">
+    <h2>Πρακτικό Εξέτασης</h2>
+    <button onclick="location.href='praktiko.html'" class="buttons">Προβολή</button>
+  </section>
+
+  <!-- Αποθετήριο -->
+  <section class="card">
+    <h2>Τελικό Κείμενο</h2>
+    <input type="url" id="nimertisInput" placeholder="Σύνδεσμος Νημερτής">
+    <button class="buttons" onclick="saveNimertis()">Καταχώρηση</button>
+    <p id="nimertisMsg"></p>
+  </section>
+</main>

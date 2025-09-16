@@ -153,6 +153,7 @@ router.patch(
   "/me/draft",
   authenticateToken,
   authorizeRoles("student"),
+  upload.single("draftFile"),
   thesesController.uploadDraftController
 );
 
