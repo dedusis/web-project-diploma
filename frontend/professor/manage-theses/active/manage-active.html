@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Kαθηγητής | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="../thesesmanage.js"></script>
+</head>
+<body>
+  <header>
+    <div class="upper" id="prof-dashboard">Professor Dashboard</div>
+    <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='../../professor1.html'" alt="Logo" class="page-logo">
+    </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+    </div>
+  </header>
+  <h2 style="text-align:center;">Διαχείριση Εργασίας (Ενεργή)</h2>
+
+<div class="notes-layout">
+  <!-- Αριστερή στήλη -->
+  <div class="notes-left">
+    <h3 style="margin-left: 15px; font-size:25px">Οι Σημειώσεις Μου</h3>
+    <div id="notesList" class="notes-list">Φόρτωση...</div>
+  </div>
+
+  <!-- Δεξιά στήλη -->
+  <div class="notes-right">
+    <!-- Νέα Σημείωση -->
+    <div class="card">
+      <h3>Νέα Σημείωση</h3>
+      <form id="noteForm">
+        <textarea id="noteText" maxlength="300" placeholder="Γράψε σημείωση (max 300 χαρακτήρες)"></textarea>
+        <button  type="button" id="addNoteBtn" class="buttons" onclick="addNote(event)">Καταχώρηση</button>
+      </form>
+      <p id="noteMsg"></p>
+    </div>
+
+    <!-- Ενέργειες -->
+    <div class="card">
+      <h3>Ενέργειες</h3>
+        <div class="card" id="cancelBox" style="display:none;">
+         <h3>Ακύρωση Διπλωματικής (μόνο για Επιβλέποντα)</h3>
+            <form id="cancelForm">
+                <label for="apNumber">Αριθμός Πράξης ΓΣ:</label>
+                <input type="text" id="apNumber" name="apNumber" required />
+
+                <label for="apYear">Έτος Πράξης ΓΣ:</label>
+                <input type="number" id="apYear" name="apYear" required />
+
+                <button type="button" id="cancelByProf" class="buttons" onclick="cancelThesisByProfessor(event)">Ακύρωση</button>
+            </form>
+            <p id="cancelMsg"></p>
+        </div>
+
+        <div class="card" id="statusBox" style="display:none;">
+            <h3>Ενέργεια Κατάστασης</h3>
+             <button onclick="changeToUnderReview()" id="underReviewBtn" class="buttons">
+                Μετάβαση σε Υπό Εξέταση
+             </button>
+             <div id="statusMsg"></div>
+  </div>
+
+    </div>
+  </div>
+</div>
+

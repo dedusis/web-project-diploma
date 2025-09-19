@@ -618,6 +618,9 @@ const getInvitedProfessors = async (thesisId,professorId ) => {
   return {
     thesesId: theses._id,
     title: theses.title,
+    supervisor:theses.professor ? {
+      id: theses.professor._id,
+    }:null,
     committee: theses.committee?.map(c => ({
       professor: {
         id: c.professor._id,
@@ -644,20 +647,14 @@ const unassignThesisFromStudent = async (thesesId) => {
   if (!studentId) {
     throw new Error("This thesis is not assigned to any student");
   }
-  const isAuthorized =
-  theses.professor?._id.toString() === professorId ||
-  (theses.committee?.some(c => c.professor._id.toString() === professorId && c.status === "accepted"));
-
-  if (!isAuthorized) {
-    const err = new Error("Unauthorized to unassign from this theses");
-    err.status = 403;
-    throw err;
-  }
+  
   if (theses.status !== "pending") {
     throw new Error("Can only unassign theses with status 'pending'");
   }
   theses.student=null;
   theses.status="pending";
+  theses.committee = [];  
+
   await theses.save();
   return theses;
 };
@@ -667,23 +664,7 @@ const addNotes = async (thesesId,professorId,text ) => {
   if (!theses) {
     throw new Error("Thesis not found");
   }
-  const isAuthorized =
-    theses.professor?.toString() === professorId ||
-    theses.committee?.some((c) => {
-      const committeeProfId = c.professor._id
-        ? c.professor._id.toString() 
-        : c.professor.toString();    
-      return committeeProfId === professorId && c.status === "accepted";
-    });
-
-  if (!isAuthorized) {
-    const err = new Error("Unauthorized to add notes to this thesis");
-    err.status = 403;
-    throw err;
-  }
-  if (theses.status !== "active" && theses.status !== "under review") {
-    throw new Error("Can only add notes to theses with status 'active' or 'under review'");
-  }
+ 
   const newNote = {
     text,
     professor: professorId,
@@ -714,9 +695,7 @@ const viewMyNotes = async (thesesId,professorId) => {
   }
 
   const mynotes = theses.notes.filter(note => note.professor._id.toString() === professorId);
-  if (mynotes.length === 0) {
-    throw new Error("No notes found for this professor on this thesis");
-  }
+  
 
   return mynotes.map(note => ({
     text: note.text,
@@ -733,15 +712,13 @@ const cancelThesesByProfessor = async(thesisid,professorId,apNumber,apYear) => {
   
 
   if (theses.professor.toString() !== professorId) {
-    throw new Error("Only the supervising professor can cancel this thesis");
+    throw new Error("Mόνο ο επιβλέπων καθηγητής μπορεί να ακυρώσει τη διπλωματική");
   }
-  if (theses.status!== "active") {
-    throw new Error("Only active theses can be canceled by the professor");
-  }
-  const twoYears = new Date(theses.activatedAt);
+  
+  const twoYears = new Date(theses.assignedDate);
   twoYears.setFullYear(twoYears.getFullYear() + 2);
   if (new Date() < twoYears) {
-    throw new Error("Thesis can only be canceled after 2 years from the assigned date");
+    throw new Error("Η διπλωματική δεν μπορεί να ακυρωθεί πριν περάσουν 2 χρόνια από την οριστική ανάθεση της!");
   }
   theses.status = "cancelled";
   theses.cancel_reason = 'Απο διδάσκοντα';

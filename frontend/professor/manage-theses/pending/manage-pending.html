@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Kαθηγητής | Διπλωματικές</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="../thesesmanage.js"></script>
+</head>
+<body>
+  <header>
+    <div class="upper" id="prof-dashboard">Professor Dashboard</div>
+    <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='../../professor1.html'" alt="Logo" class="page-logo">
+    </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+    </div>
+  </header>
+   <h2 style="text-align:center;">Διαχείριση Εργασίας (Υπό Ανάθεση)</h2>
+
+<div class="manage-grid">
+  <!-- Μέλη Επιτροπής -->
+  <div class="card">
+    <h3>Μέλη Τριμελούς Επιτροπής</h3>
+    <div id="committeeList">Φόρτωση...</div>
+  </div>
+
+  <!-- Ενέργειες -->
+  <div class="card">
+    <h3>Ενέργειες</h3>
+    <button onclick="unassignThesis()" id="cancelBtn" class="buttons" style="display: none">Ακύρωση Ανάθεσης</button>
+  </div>
+</div>
+
+</body>
+</html>

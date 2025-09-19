@@ -333,18 +333,37 @@ async function loadThesesHistory() {
       oldCards.forEach(c => c.remove());
 
       theses.forEach((thesis) => {
-        const thesisbox = document.createElement("div");
-        thesisbox.classList.add("thesis-card");
-        thesisbox.innerHTML = `
-          <h3>${thesis.title}</h3>
-          <p class="thesis-meta"><b>Φοιτητής:</b> ${thesis.student ? thesis.student.name + " " + thesis.student.surname : "—"}</p>
-          <p class="thesis-meta"><b>Κατάσταση:</b> ${thesis.status}</p>
-          <p class="thesis-meta"><b>Ρόλος:</b> ${thesis.role === "supervisor" ? "Επιβλέπων" : "Μέλος τριμελούς"}</p>
-          <button class="buttons" onclick="location.href='details.html?id=${thesis._id}'">Επιλογή</button>
-          <button class="buttons" onclick="location.href='manage.html?thesisId=${thesis._id}'">Διαχείρηση</button>
-          `;
-        container.appendChild(thesisbox);
-      });
+      const thesisbox = document.createElement("div");
+      thesisbox.classList.add("thesis-card");
+
+      // ✅ επιλέγουμε σελίδα διαχείρισης ανάλογα το status
+      let managePage = "";
+      switch (thesis.status) {
+        case "pending":       // Υπό Ανάθεση
+          managePage = `manage-theses/pending/manage-pending.html?thesisId=${thesis._id}`;
+          break;
+        case "active":        // Ενεργή
+          managePage = `manage-theses/active/manage-active.html?thesisId=${thesis._id}`;
+          break;
+        case "under_review":  // Υπό Εξέταση
+          managePage = `manage-theses/under_review/manage-review.html?thesisId=${thesis._id}`;
+          break;
+        case "completed":
+          managePage = `manage-theses/manage-completed.html?thesisId=${thesis._id}`;
+          break;
+      }
+
+      thesisbox.innerHTML = `
+        <h3>${thesis.title}</h3>
+        <p class="thesis-meta"><b>Φοιτητής:</b> ${thesis.student ? thesis.student.name + " " + thesis.student.surname : "—"}</p>
+        <p class="thesis-meta"><b>Κατάσταση:</b> ${thesis.status}</p>
+        <p class="thesis-meta"><b>Ρόλος:</b> ${thesis.role === "supervisor" ? "Επιβλέπων" : "Μέλος τριμελούς"}</p>
+        <button class="buttons" onclick="location.href='details.html?id=${thesis._id}'">Επιλογή</button>
+        <button class="buttons" onclick="location.href='${managePage}'">Διαχείριση</button>
+      `;
+      container.appendChild(thesisbox);
+    });
+
     } else {
       console.error("Failed to fetch theses history:", response.statusText);
     }
