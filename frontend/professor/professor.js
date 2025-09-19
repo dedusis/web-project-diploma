@@ -41,7 +41,7 @@ async function loadTopics() {
           <p>${thesis.description || ''}</p>
           <div class="actions">
             <span class="badge">${thesis.status}</span>
-            <button class="buttons">Επεξεργασία</button>
+            <button onclick="location.href='edit.html?id=${thesis._id}'" class="buttons">Επεξεργασία</button>
           </div>
         `;
         topicsList.appendChild(topicBox);
@@ -54,7 +54,88 @@ async function loadTopics() {
   }
 }
 
+async function loadThesisPlaceholders() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("id");
 
+  try {
+    const res = await fetch(`http://localhost:3000/theses/professor/${thesisId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+
+    if (!res.ok) throw new Error("Σφάλμα φόρτωσης");
+
+    const thesis = await res.json();
+
+    // placeholders για τίτλο / περιγραφή
+    document.getElementById("edit-title").placeholder = thesis.title || "";
+    document.getElementById("edit-description").placeholder = thesis.description || "";
+
+    // προβολή τρέχοντος PDF (όπως στο loadThesisDetails)
+    const pdfLink = document.getElementById("current-pdf-link");
+    if (thesis.attachment) {
+      pdfLink.href = thesis.attachment; // backend already δίνει /uploads/...
+      pdfLink.textContent = thesis.attachment.split("/").pop(); // μόνο filename
+    } else {
+      pdfLink.removeAttribute("href");
+      pdfLink.textContent = "Δεν υπάρχει ανεβασμένο PDF";
+    }
+
+  } catch (err) {
+    console.error("Αποτυχία φόρτωσης διπλωματικής:", err);
+  }
+}
+
+async function updateThesis() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("id");
+
+  const formData = new FormData();
+  const titleInput = document.getElementById("edit-title");
+  const descInput = document.getElementById("edit-description");
+  const fileInput = document.getElementById("edit-pdfFile");
+
+  if (titleInput.value.trim()) {
+    formData.append("title", titleInput.value.trim());
+  }
+  if (descInput.value.trim()) {
+    formData.append("description", descInput.value.trim());
+  }
+  if (fileInput.files.length > 0) {
+    formData.append("pdfFile", fileInput.files[0]);
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/theses/${thesisId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: formData,
+    });
+
+    const msg = document.getElementById("editMsg");
+
+    if (res.ok) {
+      msg.textContent = "Η διπλωματική ενημερώθηκε!";
+      msg.style.color = "green";
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);    } else {
+      const error = await res.json();
+      msg.textContent = error.error || "Σφάλμα κατά την ενημέρωση.";
+      msg.style.color = "red";
+    }
+  } catch (err) {
+    console.error(err);
+    const msg = document.getElementById("editMsg");
+    msg.textContent = "Σφάλμα σύνδεσης με τον διακομιστή.";
+    msg.style.color = "red";
+  }
+}
+
+
+window.updateThesis = updateThesis;
 // Δημιουργία νέου θέματος
 if (createForm) {
   createForm.addEventListener('submit', async (e) => {
@@ -123,6 +204,7 @@ async function loadUserData() {
     console.error('Error fetching user data:', err);
   }
 }
+
 
 // Αποσύνδεση χρήστη
 const logoutButton = document.getElementById("logoutBtn");
@@ -558,7 +640,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadThesesHistory();
   loadInvitations();
   loadProfessorStats();
+  loadThesisPlaceholders();
   loadThesisDetails();
+
   document.getElementById("statusFilter").addEventListener("change", loadThesesHistory);
   document.getElementById("roleFilter").addEventListener("change", loadThesesHistory);
   document.getElementById("exportCsv").addEventListener("click", () => exportTheses("csv"));

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Επεξεργασία Θέματος</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="professor.js"></script>
+</head>
+<body>
+  <header>
+    <div class="upper">Professor Dashboard</div>
+    <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='professor1.html'" alt="Logo" class="page-logo">
+    </div>
+  </header>
+
+  <main id="edit-form">
+    <h2 style="font-size:25px">Επεξεργασία Θέματος</h2>
+
+    <label>Τίτλος:
+      <input type="text" id="edit-title">
+    </label>
+
+    <label>Περιγραφή:
+      <textarea id="edit-description"></textarea>
+    </label>
+
+    <label>Ανέβασε νέο PDF (προαιρετικά):
+      <input type="file" id="edit-pdfFile" accept="application/pdf">
+    </label>
+
+    <div id ="current-pdf">
+      <p>Τρέχον PDF: <a id="current-pdf-link" href="#" target="_blank">Προβολή PDF</a></p>
+
+    <button class="buttons" onclick="updateThesis()">Αποθήκευση Αλλαγών</button>
+    <p id="editMsg" class="muted"></p>
+  </main>
+</body>
+</html>

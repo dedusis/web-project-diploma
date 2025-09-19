@@ -91,6 +91,7 @@ router.put(
   '/:id',
   authenticateToken,
   authorizeRoles('professor', 'secretary'),
+  upload.single("pdfFile"),
   thesesController.updateThesesController
 );
 

@@ -48,13 +48,21 @@ const getActiveAndUnderReviewController = async (req, res) => {
 
 const updateThesesController = async (req, res) => {
   try {
-    const updated = await thesesService.updateTheses(req.params.id, req.body);
-    if (!updated) return res.status(404).json({ error: "Theses not found" });
+    const updates = { ...req.body };
+   if (req.file) {
+    updates.attachment = `/uploads/${req.file.filename}`;}
+
+    const updated = await thesesService.updateTheses(req.params.id, updates);
+    if (!updated) {
+      return res.status(404).json({ error: "Thesis not found" });
+    }
     res.json(updated);
+    console.log("ok");
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
+
 
 const deleteThesesController = async (req, res) => {
   try {
@@ -207,7 +215,7 @@ const showProfessorInvitationsController = async (req,res) => {
 const uploadDraftController = async (req, res) => {
   try {
     const studentId = req.user.id;
-    const draftFile= req.file ? req.file.path : null;
+    const draftFile = req.file ? `/uploads/${req.file.filename}` : null;
     const { extraLinks } = req.body;
 
     const updatedThesis = await thesesService.uploadDraft(studentId, { draftFile, extraLinks });
