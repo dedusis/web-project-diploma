@@ -158,6 +158,14 @@ router.patch(
   thesesController.uploadDraftController
 );
 
+router.get(
+  "/:id/draft",
+  authenticateToken,
+  authorizeRoles("professor"),
+  thesesController.getDraftController
+);
+
+
 // Student sets exam details
 router.patch(
   "/me/exam",

@@ -1,4 +1,3 @@
-import { get } from "http";
 import thesesService from "./service.js";
 
 const createThesesController = async (req, res) => {
@@ -176,18 +175,22 @@ const showProfessorAvailableThesesController = async(req,res) => {
     }
 }
 const showProfessorThesesController = async (req, res) => {
-    try {
-      const {status,role} = req.query;
-      const theses = await thesesService.showProfessorTheses(req.user.id,{status,role});
-      res.json(theses);
+  try {
+    const professorId = req.user.id || req.user._id; // ασφάλεια
+    const { status, role } = req.query;
+
+    const theses = await thesesService.showProfessorTheses(professorId, { status, role });
+
+    return res.json(theses);
+  } catch (err) {
+    if (err.message === 'No theses assigned to this professor') {
+      return res.status(404).json({ error: err.message });
     }
-    catch (err) {
-      if (err.message === 'No theses assigned to this professor') {
-        return res.status(404).json({ error: err.message });
-      }
-      res.status(500).json({ error: err.message });
-    }
+    console.error("Error in showProfessorThesesController:", err); // καλό για debug
+    return res.status(500).json({ error: err.message });
+  }
 };
+
 const showThesesDetailsController = async (req, res) => {
   try {
     
@@ -226,6 +229,16 @@ const uploadDraftController = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ message: "Η ανάρτηση απέτυχε: " + err.message });  }
+};
+
+const getDraftController = async (req, res) => {
+  try {
+    const thesisId = req.params.id;
+    const draft = await thesesService.getDraft(thesisId);
+    res.json(draft);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // Student sets exam details
@@ -448,5 +461,6 @@ export default {
   setNimertisLinkController,
   getCompletedThesisController,
   getAllThesesController,
-  showProfessorAvailableThesesController
+  showProfessorAvailableThesesController,
+  getDraftController
 };

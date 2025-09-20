@@ -2,6 +2,8 @@ import Theses from "./model.js";
 import Student from "../student/model.js";
 import Professor from "../professor/model.js";
 import mongoose from "mongoose";
+import Announcement from "../announcements/model.js";
+
 
 const createTheses = async (professorId,data,filePath) => {
   const theses = new Theses({
@@ -273,6 +275,17 @@ const uploadDraft = async (studentId, { draftFile, extraLinks }) => {
   return thesis;
 };
 
+const getDraft = async (thesisId) => {
+  const thesis = await Theses.findById(thesisId).select("draftFile extraLinks");
+  if (!thesis) throw new Error("Thesis not found");
+
+  return {
+    draftFile: thesis.draftFile || null,
+    extraLinks: thesis.extraLinks || [],
+  };
+};
+
+
 // Student sets exam details
 const setExamDetails = async (studentId, { examDate, examMode, examLocation }) => {
   const thesis = await Theses.findOne({ student: studentId });
@@ -333,7 +346,7 @@ const setGrade = async (id, professorId, gradeData) => {
   const alreadyGraded = thesis.grades.some(
     (g) => g.professor.toString() === professorId.toString()
   );
-  if (alreadyGraded) throw new Error("Professor has already graded this thesis");
+  if (alreadyGraded) throw new Error("Έχετε ήδη ορίσει βαθμολογία στη συγκεκριμένη διπλωματική");
 
   // calc total = MO criteria
   const { originality, methodology, presentation, knowledge } = gradeData.criteria;
@@ -456,12 +469,15 @@ const getCompletedThesis = async (id) => {
 
   return thesis; 
 };
-
 const showProfessorTheses = async (professorId, filters = {}) => {
+  const profIdStr = professorId.toString();
+  const profObjectId = new mongoose.Types.ObjectId(professorId);
+
+  // 🔎 Query: Supervisor (όλες) Ή Committee member (accepted)
   const theses = await Theses.find({
     $or: [
-      { professor: professorId },
-      { "committee.professor": professorId }
+      { professor: profObjectId },
+      { committee: { $elemMatch: { professor: profObjectId, status: "accepted" } } }
     ]
   })
     .select("-notes -statusHistory -__v")
@@ -472,36 +488,40 @@ const showProfessorTheses = async (professorId, filters = {}) => {
   }
 
   const thesesWithRole = theses.map(thesis => {
-  let role = null;
+    let role = null;
 
-  if (
-    thesis.professor &&
-    thesis.professor._id &&
-    thesis.professor._id.toString() === professorId.toString()
-  ) {
-    role = "supervisor";
-  } else if (
-    thesis.committee &&
-    thesis.committee.some(inv => inv.professor.toString() === professorId.toString())
-  ) {
-    role = "committee";
-  }
+    // ✅ Supervisor πάντα προτεραιότητα
+    if (
+      thesis.professor &&
+      thesis.professor.toString() === profIdStr
+    ) {
+      role = "supervisor";
+    } else if (
+      thesis.committee?.some(
+        inv =>
+          inv.professor?.toString() === profIdStr &&
+          inv.status === "accepted"
+      )
+    ) {
+      role = "committee";
+    }
 
-  return { ...thesis.toObject(), role };
-});
+    return { ...thesis.toObject(), role };
+  });
 
+  // εφαρμογή φίλτρων
   let filtered = thesesWithRole;
-
   if (filters.status) {
     filtered = filtered.filter(t => t.status === filters.status);
   }
-
   if (filters.role) {
     filtered = filtered.filter(t => t.role === filters.role);
   }
 
   return filtered;
 };
+
+
 
 const showthesesdetails = async (thesesId) => {
   const theses = await Theses.findById(thesesId)
@@ -565,6 +585,7 @@ const showthesesdetails = async (thesesId) => {
     examLocation: theses.examLocation || null,
     extraLinks: theses.extraLinks || [],
     daysSinceAssignment,
+    gradingOpen: theses.gradingOpen || false,
     ap_number: theses.ap_number || null,
     ap_year: theses.ap_year || null,
     cancel_ap_number: theses.cancel_ap_number || null,
@@ -746,6 +767,45 @@ const changeToUnderReview = async(thesesId,professorId) => {
   theses.status = "under_review";
   await theses.save();
 }
+
+
+
+const generateAnnouncement = async (thesisId, professorId) => {
+  const thesis = await Theses.findById(thesisId)
+    .populate("professor", "name surname")
+    .populate("student", "name surname student_number")
+    .populate("committee.professor", "name surname");
+
+  if (!thesis) throw new Error("Thesis not found");
+  if (thesis.professor._id.toString() !== professorId.toString()) {
+    throw new Error("Only the supervisor can generate announcements");
+  }
+  if (!thesis.examDate || !thesis.examLocation) {
+    throw new Error("Exam details are missing");
+  }
+
+  const text = `
+    Ο/Η φοιτητής/τρια ${thesis.student.name} ${thesis.student.surname} 
+    (ΑΜ: ${thesis.student.student_number}) θα παρουσιάσει τη διπλωματική εργασία:
+    «${thesis.title}»
+
+    Επιβλέπων: ${thesis.professor.name} ${thesis.professor.surname}
+    Μέλη τριμελούς:
+    ${thesis.committee.map(c => `- ${c.professor.name} ${c.professor.surname}`).join("\n")}
+
+    Η παρουσίαση θα γίνει την ${new Date(thesis.examDate).toLocaleString("el-GR")} 
+    στη ${thesis.examLocation} (${thesis.examMode || "Δια ζώσης"}).
+  `;
+
+  const ann = new Announcement({
+    thesis: thesis._id,
+    professor: professorId,
+    text
+  });
+
+  return await ann.save();
+};
+
 export default {
   createTheses,
   getThesesById,
@@ -776,6 +836,7 @@ export default {
   viewMyNotes,
   cancelThesesByProfessor,
   changeToUnderReview,
-  showProfessorAvailableTheses
+  showProfessorAvailableTheses,
+  getDraft
 };
    

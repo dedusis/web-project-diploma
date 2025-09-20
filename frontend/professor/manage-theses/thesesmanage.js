@@ -28,6 +28,8 @@ async function loadUserData() {
       document.getElementById('username').textContent = user.username || '—';
       document.getElementById('email').textContent = user.email || '—';
       document.getElementById('department').textContent = user.department || '—';
+      loadGradingSection();
+      checkSupervisor();
     } else {
       console.error('Failed to fetch user data:', response.statusText);
     }
@@ -148,6 +150,19 @@ export async function addNote(e) {
     alert("Σφάλμα σύνδεσης με τον διακομιστή.");
   }
 }
+function checkSupervisor() {
+  if (window.thesisData?.supervisor?.id === window.currentUserId) {
+    // Ο χρήστης είναι επιβλέπων
+    document.getElementById("openGradingBtn").style.display = "block";
+    document.getElementById("cancelBox").style.display = "block";
+    document.getElementById("statusBox").style.display = "block";
+  } else {
+    // Μη επιβλέπων
+    document.getElementById("openGradingBtn").style.display = "none";
+    document.getElementById("cancelBox").style.display = "none";
+    document.getElementById("statusBox").style.display = "none";
+  }
+}
 
 export async function loadNotes() {
   const params = new URLSearchParams(window.location.search);
@@ -264,7 +279,244 @@ export async function changeToUnderReview() {
   }
 }
 
-window.changeToUnderReview = changeToUnderReview;
+export async function loadDraft() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("thesisId");
+
+  try {
+    const response = await fetch(`http://localhost:3000/theses/professor/${thesisId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) throw new Error(`Σφάλμα: ${response.status}`);
+
+    const thesis = await response.json();
+    const container = document.getElementById("draftBox");
+
+    let draftHtml = thesis.draftFile
+      ? `<p><a href="${thesis.draftFile}" target="_blank">Λήψη Πρόχειρου</a></p>`
+      : `<p>Ο φοιτητής δεν έχει ανεβάσει πρόχειρο κείμενο.</p>`;
+
+    let extraLinksHtml = "";
+    if (thesis.extraLinks && thesis.extraLinks.length > 0) {
+      extraLinksHtml = `
+        <h4>Επιπλέον Σύνδεσμοι</h4>
+        <ul>
+          ${thesis.extraLinks
+            .map((link) => `<li><a href="${link}" target="_blank">${link}</a></li>`)
+            .join("")}
+        </ul>
+      `;
+    }
+
+    container.innerHTML = `
+      <h3>Πρόχειρο Κείμενο Διπλωματικής</h3>
+      ${draftHtml}
+      ${extraLinksHtml}
+    `;
+  } catch (err) {
+    console.error("Σφάλμα:", err);
+    document.getElementById("draftBox").innerHTML =
+      "<p>Σφάλμα φόρτωσης πρόχειρου.</p>";
+  }
+}
+export async function openGrading() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("thesisId");
+
+  try {
+    const res = await fetch(`http://localhost:3000/theses/${thesisId}/open-grading`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("Η καταχώρηση βαθμών άνοιξε!");
+      window.location.reload();
+    } else {
+      alert(data.error || "Σφάλμα κατά το άνοιγμα βαθμολόγησης.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Σφάλμα σύνδεσης με τον διακομιστή.");
+  }
+}
+export async function submitGrade() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("thesisId");
+
+  // Παίρνουμε τις τιμές από τη φόρμα
+  const originality = Number(document.getElementById("originality").value);
+  const methodology = Number(document.getElementById("methodology").value);
+  const presentation = Number(document.getElementById("presentation").value);
+  const knowledge = Number(document.getElementById("knowledge").value);
+
+  // Validation πριν στείλουμε
+  if (
+    isNaN(originality) || isNaN(methodology) ||
+    isNaN(presentation) || isNaN(knowledge)
+  ) {
+    alert("Συμπλήρωσε όλους τους βαθμούς (0–10).");
+    return;
+  }
+
+  const gradeData = {
+    criteria: {
+      originality,
+      methodology,
+      presentation,
+      knowledge,
+    },
+  };
+
+  try {
+    const res = await fetch(`http://localhost:3000/theses/${thesisId}/grade`, {
+      method: "PATCH", 
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(gradeData),
+    });
+    const msgBox = document.getElementById("gradeMessage");
+    const data = await res.json();
+
+    if (res.ok) {
+      msgBox.style.color = "green";
+      msgBox.innerText = "Η βαθμολογία καταχωρήθηκε με επιτυχία!";
+      loadGrades();
+      document.getElementById("gradeForm").reset();
+    } else {
+      msgBox.style.color = "red";
+      msgBox.innerText = data.error || "Σφάλμα κατά την καταχώρηση βαθμού.";
+    }
+  } catch (err) {
+    msgBox.style.color = "red";
+    msgBox.innerText = "Αποτυχία σύνδεσης με τον διακομιστή.";
+  }
+}
+
+export async function loadGrades() {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("thesisId");
+
+  try {
+    const res = await fetch(`http://localhost:3000/theses/${thesisId}/grades`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+    const container = document.getElementById("gradesList");
+
+    if (!res.ok) {
+      container.innerHTML = `<p style="color:red;">${data.error || "Σφάλμα φόρτωσης βαθμών."}</p>`;
+      return;
+    }
+
+    if (!data.grades || data.grades.length === 0) {
+      container.innerHTML = "<p>Δεν έχουν καταχωρηθεί ακόμα βαθμοί.</p>";
+      return;
+    }
+
+    // Φτιάχνουμε HTML για κάθε βαθμό
+    container.innerHTML = `
+      <h4>Καταχωρημένοι Βαθμοί</h4>
+      <ul>
+        ${data.grades.map(g => `
+          <li style="margin-bottom:10px;">
+            <b>${g.professor?.name || "Άγνωστος"} ${g.professor?.surname || ""}</b> 
+            - Σύνολο: <b>${g.total}</b><br>
+            🔹 Πρωτοτυπία: ${g.criteria.originality}<br>
+            🔹 Μεθοδολογία: ${g.criteria.methodology}<br>
+            🔹 Παρουσίαση: ${g.criteria.presentation}<br>
+            🔹 Γνώση: ${g.criteria.knowledge}
+          </li>
+        `).join("")}
+      </ul>
+      <h4>Τελικός Μέσος Όρος: ${data.finalGrade ?? "—"}</h4>
+    `;
+  } catch (err) {
+    console.error("Σφάλμα:", err);
+    document.getElementById("gradesList").innerHTML =
+      "<p style='color:red;'>Αποτυχία σύνδεσης με τον διακομιστή.</p>";
+  }
+}
+export async function createAnnouncement() {
+  try {
+    const thesisId = new URLSearchParams(window.location.search).get("thesisId"); // παίρνει το thesisId από το query string
+    const customText = document.getElementById("customAnnText").value.trim();
+
+    if (!thesisId) {
+      alert("Δεν βρέθηκε ID διπλωματικής.");
+      return;
+    }
+
+    const res = await fetch("http://localhost:3000/api/announcements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        thesisId,
+        text: customText || null
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Σφάλμα δημιουργίας ανακοίνωσης");
+    }
+
+    document.getElementById("announcementBox").innerHTML = `
+      <p style="white-space:pre-line;">${data.text}</p>
+      <p><i>Δημιουργήθηκε στις: ${new Date(data.createdAt).toLocaleString("el-GR")}</i></p>
+    `;
+  } catch (err) {
+    console.error(err);
+    document.getElementById("announcementBox").innerText = "Σφάλμα: " + err.message;
+  }
+}
+
+
+async function loadAnnouncements() {
+  try {
+    const res = await fetch("http://localhost:3000/announcements/feed?format=json");
+    if (!res.ok) throw new Error("Αποτυχία φόρτωσης");
+    const data = await res.json();
+
+    const container = document.getElementById("announcements");
+    container.innerHTML = data.length
+      ? data.map(a => `
+        <div class="announcement">
+          <h3>${a.thesis?.title || "Διπλωματική"}</h3>
+          <p>${a.text}</p>
+          <p class="date">📅 Εξέταση: ${
+            a.thesis?.examDate
+              ? new Date(a.thesis.examDate).toLocaleString("el-GR")
+              : "—"
+          }</p>
+          <p>📍 ${a.thesis?.examLocation || "—"} (${
+            a.thesis?.examMode === "online" ? "💻 Online" : "🏫 Δια ζώσης"
+          })</p>
+          <p>👨‍🏫 ${a.professor?.name || ""} ${a.professor?.surname || ""}</p>
+        </div>
+      `).join("")
+      : "<p>Δεν υπάρχουν ανακοινώσεις.</p>";
+  } catch (err) {
+    document.getElementById("announcements").innerText =
+      "Σφάλμα: " + err.message;
+  }
+}
 
 
 
@@ -273,11 +525,23 @@ document.addEventListener("DOMContentLoaded", () => {
   loadUserData();
   loadCommittee();
   loadNotes();
-  checkSupervisor();
-  
+  loadDraft();
+  loadGrades();
+  loadAnnouncements();
+  const gradeForm = document.getElementById("gradeForm");
+  if (gradeForm) {
+    gradeForm.addEventListener("submit", (e) => {
+      e.preventDefault(); 
+      submitGrade();
+    });
+  }
 });
+
 
 window.unassignThesis=unassignThesis;
 window.addNote=addNote;
 window.cancelThesisByProfessor = cancelThesisByProfessor;
 window.changeToUnderReview = changeToUnderReview;
+window.openGrading = openGrading;
+window.submitGrade = submitGrade;
+window.createAnnouncement = createAnnouncement;

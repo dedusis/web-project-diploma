@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <title>Καθηγητής | Υπό Εξέταση</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <script type="module" src="../thesesmanage.js"></script>
+</head>
+<body>
+  <header>
+    <div class="upper" id="prof-dashboard">Professor Dashboard</div>
+    <div>   
+      <img src="/images/my.logo2.png" onclick="location.href='../../professor1.html'" alt="Logo" class="page-logo">
+    </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <button id="userButton" class="user-icon">👤</button>
+        <div id="userDropdown" class="dropdown hidden">
+          <p><b>Όνομα:</b> <span id="name">—</span></p>
+          <p><b>Username:</b> <span id="username">—</span></p>
+          <p><b>Email:</b> <span id="email">—</span></p>
+          <p><b>Τμήμα:</b> <span id="department">—</span></p>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout">Αποσύνδεση</button>
+    </div>
+  </header>
+
+  <h2 style="text-align:center;">Διαχείριση Εργασίας (Υπό Εξέταση)</h2>
+  <div class="grading-layout">
+  <!-- Αριστερή στήλη -->
+  <div class="grading-left">
+    <div class="card" id="draftBox">
+      <h3>Πρόχειρο Κείμενο Διπλωματικής</h3>
+      <div id="draftContent">Φόρτωση...</div>
+    </div>
+
+    <div class="card">
+      <h3>Καταχώρηση Βαθμού</h3>
+
+      <!-- Κουμπί Supervisor -->
+      <button id="openGradingBtn" class="buttons" onclick="openGrading()">
+        Άνοιγμα Καταχώρησης Βαθμών
+      </button>
+
+      <!-- Φόρμα βαθμολογίας -->
+      <form id="gradeForm">
+        <label>Πρωτοτυπία:</label>
+        <input type="number" id="originality" min="0" max="10" required><br>
+
+        <label>Μεθοδολογία:</label>
+        <input type="number" id="methodology" min="0" max="10" required><br>
+
+        <label>Παρουσίαση:</label>
+        <input type="number" id="presentation" min="0" max="10" required><br>
+
+        <label>Γνώση:</label>
+        <input type="number" id="knowledge" min="0" max="10" required><br>
+
+        <button type="submit" class="buttons">Υποβολή Βαθμού</button>
+      </form>
+      <div id="gradeMessage" style="margin-top:10px; font-weight:bold;"></div>
+
+    </div>
+  </div>
+
+  <!-- Δεξιά στήλη -->
+  <div class="grading-right">
+    <div class="card">
+      <h3>Βαθμοί Επιτροπής</h3>
+      <div id="gradesList">Φόρτωση βαθμών...</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Ανακοίνωση Παρουσίασης</h3>
+
+  <!-- Textarea για custom κείμενο -->
+  <textarea id="customAnnText" placeholder="Προαιρετικό: Εισάγετε δικό σας κείμενο ανακοίνωσης..." rows="5" style="width:100%; margin-top:10px;"></textarea>
+
+
+  <button class="buttons" onclick="createAnnouncement()">Δημιουργία Ανακοίνωσης</button>
+
+  <!-- Εμφάνιση αποτελέσματος -->
+  <div id="announcementBox" style="margin-top:10px; font-weight:bold;"></div>
+</div>
+
+
+</body>
+</html>
