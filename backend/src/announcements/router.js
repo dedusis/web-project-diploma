@@ -11,6 +11,6 @@ router.post(
   announcementController.createAnnouncementController
 );
 
-router.get("/feed", announcementController.announcementsFeedController);
+router.get("/", announcementController.announcementsFeedController);
 
 export default router;

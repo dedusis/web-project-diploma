@@ -456,15 +456,19 @@ export async function createAnnouncement() {
   try {
     const thesisId = new URLSearchParams(window.location.search).get("thesisId"); // παίρνει το thesisId από το query string
     const customText = document.getElementById("customAnnText").value.trim();
+    const token = localStorage.getItem("token");
 
     if (!thesisId) {
       alert("Δεν βρέθηκε ID διπλωματικής.");
       return;
     }
 
-    const res = await fetch("http://localhost:3000/api/announcements", {
+    const res = await fetch("http://localhost:3000/announcements", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+       },
       body: JSON.stringify({
         thesisId,
         text: customText || null

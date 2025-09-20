@@ -1,6 +1,6 @@
 async function loadAnnouncements() {
   try {
-    const res = await fetch("http://localhost:3000/announcements/feed?format=json");
+    const res = await fetch("http://localhost:3000/announcements?format=json");
     if (!res.ok) throw new Error("Αποτυχία φόρτωσης");
     const data = await res.json();
 

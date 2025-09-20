@@ -114,6 +114,95 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /announcements:
+    post:
+      summary: Δημιουργία ή ενημέρωση ανακοίνωσης για εξέταση ΔΕ
+      description: Μόνο ο επιβλέπων καθηγητής μπορεί να δημιουργήσει ή να ενημερώσει την ανακοίνωση για μια διπλωματική εργασία. Αν υπάρχει ήδη ανακοίνωση για τη ΔΕ, ενημερώνεται.
+      tags:
+        - Announcements
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - thesisId
+                - text
+              properties:
+                thesisId:
+                  type: string
+                  example: "64f1a1c5d2f4e8b123456789"
+                text:
+                  type: string
+                  example: "Η εξέταση θα πραγματοποιηθεί στις 15/10/2025, ώρα 12:00 στην αίθουσα Αμφιθέατρο 1."
+      responses:
+        '201':
+          description: Ανακοίνωση δημιουργήθηκε ή ενημερώθηκε
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        '400':
+          description: Σφάλμα (π.χ. ο φοιτητής δεν έχει συμπληρώσει exam info, ή δεν είναι supervisor)
+        '401':
+          description: Μη εξουσιοδοτημένος
+        '403':
+          description: Δεν έχετε δικαίωμα
+        '404':
+          description: ΔΕ δεν βρέθηκε
+
+    get:
+      summary: Λίστα ανακοινώσεων για εξετάσεις ΔΕ
+      description: Επιστρέφει όλες τις ανακοινώσεις ταξινομημένες με βάση την ημερομηνία δημιουργίας (τελευταίες πρώτα). Υποστηρίζει format JSON ή XML μέσω query param.
+      tags:
+        - Announcements
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: date
+          description: Ελάχιστη ημερομηνία (π.χ. 2025-09-01)
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: date
+          description: Μέγιστη ημερομηνία (π.χ. 2025-09-30)
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [json, xml]
+          description: Επιλογή μορφής εξόδου
+      responses:
+        '200':
+          description: Λίστα ανακοινώσεων
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Announcement'
+            application/xml:
+              schema:
+                type: string
+                example: |
+                  <announcements>
+                    <announcement>
+                      <thesisTitle>Διπλωματική Εργασία</thesisTitle>
+                      <examDate>2025-10-15T12:00:00Z</examDate>
+                      <examLocation>Αμφιθέατρο 1</examLocation>
+                      <professorName>Νίκος Παπαδόπουλος</professorName>
+                      <text>Η εξέταση θα πραγματοποιηθεί...</text>
+                    </announcement>
+                  </announcements>
+        '500':
+          description: Server error
+
   /Professor:
     post:
       summary: Create a new Professor
