@@ -10,15 +10,15 @@ async function loadAnnouncements() {
         <div class="announcement">
           <h3>${a.thesis?.title || "Διπλωματική"}</h3>
           <p>${a.text}</p>
-          <p class="date">📅 Εξέταση: ${
+          <p class="date"> Εξέταση: ${
             a.thesis?.examDate
               ? new Date(a.thesis.examDate).toLocaleString("el-GR")
               : "—"
           }</p>
-          <p>📍 ${a.thesis?.examLocation || "—"} (${
-            a.thesis?.examMode === "online" ? "💻 Online" : "🏫 Δια ζώσης"
+          <p> ${a.thesis?.examLocation || "—"} (${
+            a.thesis?.examMode === "online" ? " Online" : " Δια ζώσης"
           })</p>
-          <p>👨‍🏫 ${a.professor?.name || ""} ${a.professor?.surname || ""}</p>
+          <p> ${a.professor?.name || ""} ${a.professor?.surname || ""}</p>
         </div>
       `).join("")
       : "<p>Δεν υπάρχουν ανακοινώσεις.</p>";

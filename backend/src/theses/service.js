@@ -399,6 +399,7 @@ const getPraktiko = async (studentId) => {
   const thesis = await Theses.findOne({ student: studentId })
     .populate("professor", "name surname email")
     .populate("committee.professor", "name surname email")
+    .populate("grades.professor", "name surname email")     
     .populate("student", "name surname email student_number");
 
   if (!thesis) throw new Error("No thesis found for this student");

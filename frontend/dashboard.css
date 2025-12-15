@@ -885,3 +885,68 @@ textarea {
 .grading-right {
   flex: 1;
 }
+
+
+/* Announcements Page */
+.announcements-container {
+  display: grid;
+  gap: 24px;
+  margin: 30px auto;
+  padding: 0 16px;
+  max-width: 1200px;
+}
+
+.announcement {
+  background: linear-gradient(135deg, #fdfcfb, #e2ebf0);
+  border-left: 6px solid #2563eb;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.announcement:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.announcement h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.announcement p {
+  margin: 6px 0;
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.announcement .date {
+  font-weight: 600;
+  color: #111827;
+}
+
+.announcement .meta {
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* Responsive grid */
+@media (min-width: 640px) {
+  .announcements-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .announcements-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
